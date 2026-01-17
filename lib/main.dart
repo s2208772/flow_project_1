@@ -1,15 +1,51 @@
 import 'package:flutter/material.dart';
-import 'page1.dart';
+import 'dart:math' as math;
+import 'my_projects.dart';
 import 'page2.dart';
 import 'page3.dart';
 import 'page4.dart';
-import 'page5.dart';
+import 'create_new_project.dart';
 import 'page6.dart';
 import 'page7.dart';
 import 'page8.dart';
 import 'extended_page1.dart';
 import 'extended_page2.dart';
 import 'header.dart';
+
+class WavyPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  WavyPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    final waveHeight = 6.0;
+    final waveWidth = size.width / 3;
+    final animatedWidth = size.width * progress;
+
+    path.moveTo(0, size.height / 2);
+
+    for (double x = 0; x < animatedWidth; x += 5) {
+      final y = size.height / 2 + math.sin((x / waveWidth) * math.pi * 2) * waveHeight;
+      path.lineTo(x, y);
+    }
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(WavyPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
+}
 
 void main() {
   runApp(const MyApp());
@@ -22,18 +58,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Flow Project',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF5C5C99)),
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
-        '/page1': (context) => Page1(),
+        '/': (context) => const MyHomePage(title: 'Flow Project Home Page'),
+        '/my_projects': (context) => MyProjects(),
         '/page2': (context) => Page2(),
         '/page3': (context) => Page3(),
         '/page4': (context) => Page4(),
-        '/page5': (context) => Page5(),
+        '/create_new_project': (context) => CreateNewProject(),
         '/page6': (context) => Page6(),
         '/page7': (context) => Page7(),
         '/page8': (context) => Page8(),
@@ -53,13 +89,65 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _lineAnimation;
+  late Animation<double> _lineFadeAnimation;
+  late Animation<double> _buttonsFadeAnimation;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 5),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(-0.1, 0.0), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
+      ),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
+      ),
+    );
+
+    _lineAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.4, 0.7, curve: Curves.easeIn),
+      ),
+    );
+
+    _lineFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.4, 0.7, curve: Curves.easeIn),
+      ),
+    );
+
+    _buttonsFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.7, 0.9, curve: Curves.easeIn),
+      ),
+    );
+
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
@@ -72,16 +160,98 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text('You have pushed the button this many times:'),
-              Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
+              FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Welcome to Flow Project',
+                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                          color: const Color(0xFF292966),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 60,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 90),
+                        child: FadeTransition(
+                          opacity: _lineFadeAnimation,
+                          child: ScaleTransition(
+                            scale: _lineAnimation,
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              width: 400,
+                              height: 2,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF5C5C99),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      FadeTransition(
+                        opacity: _buttonsFadeAnimation,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/my_projects');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF5C5C99),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                              ),
+                              child: const Text(
+                                'My Projects',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/create_new_project');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF5C5C99),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32,
+                                  vertical: 16,
+                                ),
+                              ),
+                              child: const Text(
+                                'Create New Project',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }

@@ -12,7 +12,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/page1');
+            Navigator.pushNamed(context, '/my_projects');
           },
           child: const Text('My Projects', style: TextStyle(color: Colors.white)),
         ),

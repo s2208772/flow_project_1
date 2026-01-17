@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'header.dart';
 
-class Page1 extends StatelessWidget {
+class CreateNewProject extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AppHeader(),
       body: Container(
         color: const Color(0xFFF0F0EA),
-        child: Center(child: const Text('My Projects')),
-      ), 
+        child: Center(child: const Text('Create New Project')),
+      ),
     );
   }
 }

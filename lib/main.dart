@@ -8,8 +8,6 @@ import 'create_new_project.dart';
 import 'page6.dart';
 import 'page7.dart';
 import 'page8.dart';
-import 'extended_page1.dart';
-import 'extended_page2.dart';
 import 'header.dart';
 
 class WavyPainter extends CustomPainter {
@@ -73,8 +71,6 @@ class MyApp extends StatelessWidget {
         '/page6': (context) => Page6(),
         '/page7': (context) => Page7(),
         '/page8': (context) => Page8(),
-        '/extended_page1': (context) => ExtendedPage1(),
-        '/extended_page2': (context) => ExtendedPage2(),
       },
     );
   }

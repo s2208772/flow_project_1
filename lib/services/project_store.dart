@@ -1,51 +1,48 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/project.dart';
 
 class ProjectStore {
-  static const String _key = 'projects';
   static final ProjectStore instance = ProjectStore._();
   ProjectStore._();
 
+  final CollectionReference _projectsCollection =
+      FirebaseFirestore.instance.collection('projects');
+
   Future<List<Project>> getProjects() async {
-    final sp = await SharedPreferences.getInstance();
-    final raw = sp.getString(_key);
-    if (raw == null || raw.isEmpty) return [];
-    final decoded = jsonDecode(raw) as List<dynamic>;
-    return decoded
-        .map((e) => Project.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    final snapshot = await _projectsCollection.get();
+    return snapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id; // Store the document ID
+      return Project.fromJson(data);
+    }).toList();
   }
 
   Future<void> addProject(Project project) async {
-    final list = await getProjects();
-    list.add(project);
-    await _save(list);
+    await _projectsCollection.add(project.toJson());
   }
 
   Future<void> deleteProject(String projectName) async {
-    final list = await getProjects();
-    list.removeWhere((p) => p.name == projectName);
-    await _save(list);
-  }
-
-  Future<void> updateProjectStatus(String projectName, String newStatus) async {
-    final list = await getProjects();
-    final index = list.indexWhere((p) => p.name == projectName);
-    if (index != -1) {
-      list[index] = list[index].copyWith(status: newStatus);
-      await _save(list);
+    final snapshot = await _projectsCollection
+        .where('name', isEqualTo: projectName)
+        .get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
     }
   }
 
-  Future<void> _save(List<Project> list) async {
-    final sp = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(list.map((e) => e.toJson()).toList());
-    await sp.setString(_key, encoded);
+  Future<void> updateProjectStatus(String projectName, String newStatus) async {
+    final snapshot = await _projectsCollection
+        .where('name', isEqualTo: projectName)
+        .get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.update({'status': newStatus});
+    }
   }
 
   Future<void> clear() async {
-    final sp = await SharedPreferences.getInstance();
-    await sp.remove(_key);
+    final snapshot = await _projectsCollection.get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
   }
 }

@@ -113,7 +113,7 @@ class _CreateNewProjectState extends State<CreateNewProject> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
-                          value: _projectType,
+                          initialValue: _projectType,
                           items: _projectTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                           onChanged: (v) => setState(() => _projectType = v),
                           decoration: const InputDecoration(labelText: 'Project Type'),
@@ -135,7 +135,7 @@ class _CreateNewProjectState extends State<CreateNewProject> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
-                          value: _status,
+                          initialValue: _status,
                           items: _statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
                           onChanged: (v) => setState(() => _status = v),
                           decoration: const InputDecoration(labelText: 'Project Status'),

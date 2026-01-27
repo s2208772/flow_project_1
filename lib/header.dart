@@ -1,7 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   const AppHeader({super.key});
+
+  Future<void> _signOut(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5C5C99),
+            ),
+            child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await FirebaseAuth.instance.signOut();
+      // The AuthWrapper will automatically show the AuthPage
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +58,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           child: const Text('Contact Us', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/page4');
-          },
+          onPressed: () => _signOut(context),
           child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         ),
         const SizedBox(width: 16),

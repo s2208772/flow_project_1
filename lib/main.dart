@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'dart:math' as math;
 import 'my_projects.dart';
@@ -11,6 +12,7 @@ import 'page6.dart';
 import 'page7.dart';
 import 'page8.dart';
 import 'header.dart';
+import 'auth_service.dart' show SignUpSignIn;
 
 class WavyPainter extends CustomPainter {
   final double progress;
@@ -66,9 +68,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF5C5C99)),
       ),
-      initialRoute: '/',
+      home: const AuthWrapper(),
       routes: {
-        '/': (context) => const MyHomePage(title: 'Flow Project Home Page'),
+        '/home': (context) => const MyHomePage(title: 'Flow Project Home Page'),
         '/my_projects': (context) => MyProjects(),
         '/page2': (context) => Page2(),
         '/page3': (context) => Page3(),
@@ -77,6 +79,39 @@ class MyApp extends StatelessWidget {
         '/page6': (context) => Page6(),
         '/page7': (context) => Page7(),
         '/page8': (context) => Page8(),
+        '/auth': (context) => const SignUpSignIn(),
+      },
+    );
+  }
+}
+
+/// Wrapper that listens to auth state and shows AuthPage or HomePage
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // Show loading while checking auth state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF5C5C99),
+              ),
+            ),
+          );
+        }
+
+        // User is signed in
+        if (snapshot.hasData && snapshot.data != null) {
+          return const MyHomePage(title: 'Flow Project Home Page');
+        }
+
+        // User is not signed in
+        return const SignUpSignIn();
       },
     );
   }

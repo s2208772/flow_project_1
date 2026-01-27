@@ -4,6 +4,7 @@ class Project {
   final String? type;
   final DateTime? targetDate;
   final String status;
+  final String? userId;
 
   Project({
     required this.name,
@@ -11,6 +12,7 @@ class Project {
     this.type,
     this.targetDate,
     required this.status,
+    this.userId,
   });
 
   factory Project.fromJson(Map<String, dynamic> json) => Project(
@@ -20,6 +22,7 @@ class Project {
         targetDate:
             json['targetDate'] != null ? DateTime.parse(json['targetDate']) : null,
         status: json['status'] as String,
+        userId: json['userId'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -28,6 +31,7 @@ class Project {
         'type': type,
         'targetDate': targetDate?.toIso8601String(),
         'status': status,
+        'userId': userId,
       };
 
   Project copyWith({String? status}) => Project(
@@ -36,5 +40,6 @@ class Project {
         type: type,
         targetDate: targetDate,
         status: status ?? this.status,
+        userId: userId,
       );
 }

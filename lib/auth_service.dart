@@ -35,7 +35,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
       _isLoading = true;
       _errorMessage = null;
     });
-
+  //Code adapted from (Firebase, n.d.)
     try {
       if (_isSignUp) {
         // Sign Up
@@ -50,7 +50,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
           password: _passwordController.text,
         );
       }
-      // Navigation is handled by StreamBuilder in main.dart
+
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = _getErrorMessage(e.code);
@@ -67,7 +67,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
       }
     }
   }
-
+//End of adapted code
   String _getErrorMessage(String code) {
     switch (code) {
       case 'email-already-in-use':
@@ -335,3 +335,6 @@ class _SignUpSignInState extends State<SignUpSignIn> {
     );
   }
 }
+
+//References:
+// Firebase. (n.d.). Get Started with Firebase Authentication on Flutter | Firebase Documentation. Firebase. https://firebase.google.com/docs/auth/flutter/start

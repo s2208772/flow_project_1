@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AppHeader extends StatelessWidget implements PreferredSizeWidget {
-  const AppHeader({super.key});
+class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
+  final String projectName;
+  
+  const ProjectHeader({super.key, required this.projectName});
 
   Future<void> _signOut(BuildContext context) async {
     final confirm = await showDialog<bool>(
@@ -28,14 +30,13 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
     if (confirm == true) {
       await FirebaseAuth.instance.signOut();
-      // The AuthWrapper will automatically show the AuthPage
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Flow Project (Logo placeholder)'),
+      title: Text('Flow Project - $projectName'),
       backgroundColor: const Color(0xFF5C5C99),
       elevation: 0,
       actions: [
@@ -47,15 +48,33 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/faqs');
+            Navigator.pushNamed(context, '/summary', arguments: projectName);
           },
-          child: const Text('FAQs', style: TextStyle(color: Colors.white)),
+          child: const Text('Summary', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/contact_us');
+            Navigator.pushNamed(context, '/my_tasks', arguments: projectName);
           },
-          child: const Text('Contact Us', style: TextStyle(color: Colors.white)),
+          child: const Text('My Tasks', style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/plan', arguments: projectName);
+          },
+          child: const Text('Plan', style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/schedule', arguments: projectName);
+          },
+          child: const Text('Schedule', style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/risks', arguments: projectName);
+          },
+          child: const Text('Risks', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () => _signOut(context),

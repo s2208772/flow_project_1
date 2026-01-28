@@ -4,13 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'dart:math' as math;
 import 'my_projects.dart';
-import 'page2.dart';
-import 'page3.dart';
-import 'page4.dart';
+import 'summary.dart';
+import 'my_tasks.dart';
+import 'plan.dart';
+import 'schedule.dart';
+import 'risks.dart';
+import 'faqs.dart';
+import 'contact_us.dart';
 import 'create_new_project.dart';
-import 'page6.dart';
-import 'page7.dart';
-import 'page8.dart';
 import 'header.dart';
 import 'auth_service.dart' show SignUpSignIn;
 
@@ -72,13 +73,14 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const MyHomePage(title: 'Flow Project Home Page'),
         '/my_projects': (context) => MyProjects(),
-        '/page2': (context) => Page2(),
-        '/page3': (context) => Page3(),
-        '/page4': (context) => Page4(),
+        '/summary': (context) => const Summary(),
+        '/my_tasks': (context) => const MyTasks(),
+        '/plan': (context) => const Plan(),
+        '/schedule': (context) => const Schedule(),
+        '/risks': (context) => const Risks(),
+        '/faqs': (context) => const FAQs(),
+        '/contact_us': (context) => const ContactUs(),
         '/create_new_project': (context) => CreateNewProject(),
-        '/page6': (context) => Page6(),
-        '/page7': (context) => Page7(),
-        '/page8': (context) => Page8(),
         '/auth': (context) => const SignUpSignIn(),
       },
     );

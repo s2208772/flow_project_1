@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flow_project_1/models/project.dart';
 
 class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String projectName;
+  final Project project;
   
-  const ProjectHeader({super.key, required this.projectName});
+  const ProjectHeader({super.key, required this.project});
 
   Future<void> _signOut(BuildContext context) async {
     final confirm = await showDialog<bool>(
@@ -36,7 +37,7 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text('Flow Project - $projectName'),
+      title: Text('Flow Project - ${project.name}'),
       backgroundColor: const Color(0xFF5C5C99),
       elevation: 0,
       actions: [
@@ -48,31 +49,31 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/summary', arguments: projectName);
+            Navigator.pushNamed(context, '/summary', arguments: project);
           },
           child: const Text('Summary', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/my_tasks', arguments: projectName);
+            Navigator.pushNamed(context, '/my_tasks', arguments: project);
           },
           child: const Text('My Tasks', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/plan', arguments: projectName);
+            Navigator.pushNamed(context, '/plan', arguments: project);
           },
           child: const Text('Plan', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/schedule', arguments: projectName);
+            Navigator.pushNamed(context, '/schedule', arguments: project);
           },
           child: const Text('Schedule', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/risks', arguments: projectName);
+            Navigator.pushNamed(context, '/risks', arguments: project);
           },
           child: const Text('Risks', style: TextStyle(color: Colors.white)),
         ),

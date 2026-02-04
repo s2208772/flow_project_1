@@ -9,6 +9,8 @@ import 'my_tasks.dart';
 import 'plan.dart';
 import 'schedule.dart';
 import 'risks.dart';
+import 'gantt_chart.dart';
+import 'dependencies.dart';
 import 'faqs.dart';
 import 'contact_us.dart';
 import 'create_new_project.dart';
@@ -78,6 +80,8 @@ class MyApp extends StatelessWidget {
         '/plan': (context) => const Plan(),
         '/schedule': (context) => const Schedule(),
         '/risks': (context) => const Risks(),
+        '/gantt_chart': (context) => const GanttChart(),
+        '/dependencies': (context) => const Dependencies(),
         '/faqs': (context) => const FAQs(),
         '/contact_us': (context) => const ContactUs(),
         '/create_new_project': (context) => CreateNewProject(),

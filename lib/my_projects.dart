@@ -110,7 +110,7 @@ class _MyProjectsState extends State<MyProjects> {
                                 DataCell(Text(p.status)),
                                 DataCell(ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pushNamed(context, '/summary', arguments: p.name);
+                                    Navigator.pushNamed(context, '/summary', arguments: p);
                                   },
                                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5C5C99)),
                                   child: const Text('Select', style: TextStyle(color: Colors.white)),

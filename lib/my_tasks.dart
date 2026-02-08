@@ -8,8 +8,6 @@ class MyTasks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final project = ModalRoute.of(context)?.settings.arguments as Project?;
-    final projectName = project?.name ?? 'No project selected';
-    
     return Scaffold(
       appBar: project != null 
           ? ProjectHeader(project: project)

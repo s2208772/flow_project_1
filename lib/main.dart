@@ -16,6 +16,7 @@ import 'contact_us.dart';
 import 'create_new_project.dart';
 import 'header.dart';
 import 'auth_service.dart' show SignUpSignIn;
+import 'models/project.dart';
 
 class WavyPainter extends CustomPainter {
   final double progress;
@@ -81,7 +82,10 @@ class MyApp extends StatelessWidget {
         '/schedule': (context) => const Schedule(),
         '/risks': (context) => const Risks(),
         '/gantt_chart': (context) => const GanttChart(),
-        '/dependencies': (context) => const Dependencies(),
+        '/dependencies': (context) {
+          final project = ModalRoute.of(context)?.settings.arguments as Project?;
+          return Dependencies(project: project);
+        },
         '/faqs': (context) => const FAQs(),
         '/contact_us': (context) => const ContactUs(),
         '/create_new_project': (context) => CreateNewProject(),

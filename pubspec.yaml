@@ -41,6 +41,8 @@ dependencies:
   firebase_core: ^3.13.0
   cloud_firestore: ^5.6.7
   firebase_auth: ^5.5.3
+  gantt_chart: ^0.3.0
+  flutter_gantt: ^1.0.1
 
 dev_dependencies:
   flutter_test:

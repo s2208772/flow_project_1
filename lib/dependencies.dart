@@ -15,6 +15,8 @@ class Dependencies extends StatefulWidget {
 
 class _DependenciesState extends State<Dependencies> {
   List<Task> tasks = [];
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
 
@@ -28,6 +30,7 @@ class _DependenciesState extends State<Dependencies> {
   void dispose() {
     _horizontalScrollController.dispose();
     _verticalScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -566,14 +569,41 @@ class _DependenciesState extends State<Dependencies> {
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => _addTask(project),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add new task'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5C5C99),
-                    foregroundColor: Colors.white,
-                  ),
+                //Code adapted from (GeeksforGeeks, 2022)
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search for task by name or ID',
+                          prefixIcon: const Icon(Icons.search, color: Color(0xFF5C5C99)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                          isDense: true,
+                        ),
+                        //End of adapted code
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.toLowerCase();
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () => _addTask(project),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add new task'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5C5C99),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -620,6 +650,7 @@ class _DependenciesState extends State<Dependencies> {
                               child: SizedBox(
                                 width: 1600,
                                 child: DataTable(
+                            showCheckboxColumn: false,
                             columns: const [
                               DataColumn(label: Text('Task ID')),
                               DataColumn(label: Text('Task Name')),
@@ -632,6 +663,9 @@ class _DependenciesState extends State<Dependencies> {
                               DataColumn(label: Text('Actions')),
                             ],
                             rows: tasks
+                                .where((task) => _searchQuery.isEmpty ||
+                                    task.name.toLowerCase().contains(_searchQuery) ||
+                                    task.id.toLowerCase().contains(_searchQuery))
                                 .map((task) => DataRow(
                                       onSelectChanged: (_) => _editTask(task, project),
                                       cells: [
@@ -716,3 +750,6 @@ class _DependenciesState extends State<Dependencies> {
     );
   }
 }
+
+//References
+//GeeksforGeeks. (2022, April 24). Flutter Search Bar. GeeksforGeeks. https://www.geeksforgeeks.org/flutter/flutter-search-bar/

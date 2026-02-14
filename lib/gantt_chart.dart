@@ -287,8 +287,8 @@ class GanttPainter extends CustomPainter {
       final task = tasks[i];
       final y = headerHeight + (i * rowHeight);
   
-      //Task label
-      _drawTaskLabel(canvas, task.name, 0, y, labelWidth, rowHeight);
+      //Task label with ID
+      _drawTaskLabel(canvas, '${task.id} - ${task.name}', 0, y, labelWidth, rowHeight);
       
       final startOffset = task.startDate.difference(startDate).inDays;
       final duration = task.finishDate.difference(task.startDate).inDays + 1;
@@ -322,15 +322,18 @@ class GanttPainter extends CustomPainter {
       _drawBarText(canvas, '${duration}d', barX, barY, barWidth, barHeight);
     }
     
-    // Draw today's date line on top
+    // Draw today's date line
     _drawTodayLine(canvas, size, labelWidth, headerHeight, dayWidth);
   }
 
   void _drawHeader(Canvas canvas, Size size, double labelWidth, double headerHeight, 
       double dayWidth, int totalDays) {
 
+    //Task ID label
+    _drawText(canvas, 'ID', 8 , headerHeight / 2 - 6, fontSize, FontWeight.bold, const Color(0xFF5C5C99));
+
     // Task label
-    _drawText(canvas, 'Task', 8, headerHeight / 2 - 6, fontSize, FontWeight.bold, const Color(0xFF5C5C99));
+    _drawText(canvas, 'Task', 40, headerHeight / 2 - 6, fontSize, FontWeight.bold, const Color(0xFF5C5C99));
     
     // Date labels in dd/mm/yyyy format
     final startText = '${startDate.day.toString().padLeft(2, '0')}/${startDate.month.toString().padLeft(2, '0')}/${startDate.year}';

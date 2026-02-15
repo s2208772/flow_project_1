@@ -11,7 +11,6 @@ import 'schedule.dart';
 import 'risks.dart';
 import 'gantt_chart.dart';
 import 'dependencies.dart';
-import 'faqs.dart';
 import 'contact_us.dart';
 import 'create_new_project.dart';
 import 'header.dart';
@@ -86,7 +85,6 @@ class MyApp extends StatelessWidget {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
           return Dependencies(project: project);
         },
-        '/faqs': (context) => const FAQs(),
         '/contact_us': (context) => const ContactUs(),
         '/create_new_project': (context) => CreateNewProject(),
         '/auth': (context) => const SignUpSignIn(),
@@ -95,12 +93,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
+/// Set to true to skip login during development
+const bool kSkipAuth = true;
+
 /// Wrapper that listens to auth state and shows AuthPage or HomePage
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Skip authentication for development
+    if (kSkipAuth) {
+      return const MyHomePage(title: 'Flow Project Home Page');
+    }
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {

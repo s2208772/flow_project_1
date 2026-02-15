@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'header.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/services/project_store.dart';
+import 'create_new_project.dart';
 
 class MyProjects extends StatefulWidget {
   @override
@@ -70,11 +71,33 @@ class _MyProjectsState extends State<MyProjects> {
                     final projects = snapshot.data ?? [];
                     if (projects.isEmpty) {
                       return ListView(
-                        children: const [
-                          SizedBox(height: 40),
-                          Center(child: Text('No projects yet. Create one via Create New Project.'))
+                        children: [
+                          const SizedBox(height: 30),
+                          const Center(child: Text('No projects yet. Create one via Create New Project.')),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/create_new_project');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF5C5C99),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 20,
+                              ),
+                            ),
+                            child: const Text(
+                              'Create New Project',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ],
                       );
+                      
                     }
 
                     return Align(

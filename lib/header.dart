@@ -47,12 +47,6 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/faqs');
-          },
-          child: const Text('FAQs', style: TextStyle(color: Colors.white)),
-        ),
-        TextButton(
-          onPressed: () {
             Navigator.pushNamed(context, '/contact_us');
           },
           child: const Text('Contact Us', style: TextStyle(color: Colors.white)),

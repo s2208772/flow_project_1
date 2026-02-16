@@ -79,7 +79,10 @@ class MyApp extends StatelessWidget {
         '/my_tasks': (context) => const MyTasks(),
         '/plan': (context) => const Plan(),
         '/schedule': (context) => const Schedule(),
-        '/risks': (context) => const Risks(),
+        '/risks': (context) {
+          final project = ModalRoute.of(context)?.settings.arguments as Project?;
+          return Risks(project: project);
+        },
         '/gantt_chart': (context) => const GanttChart(),
         '/dependencies': (context) {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
@@ -94,7 +97,7 @@ class MyApp extends StatelessWidget {
 }
 
 /// Set to true to skip login during development
-const bool kSkipAuth = true;
+const bool kSkipAuth = false;
 
 /// Wrapper that listens to auth state and shows AuthPage or HomePage
 class AuthWrapper extends StatelessWidget {

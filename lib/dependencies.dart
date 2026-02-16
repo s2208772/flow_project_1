@@ -672,9 +672,12 @@ class _DependenciesState extends State<Dependencies> {
                                         DataCell(SizedBox(width: 50, child: Text(task.id))),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task, project),
-                                          child: SizedBox(
-                                            width: 120,
-                                            child: Text(task.name, style: const TextStyle(decoration: TextDecoration.underline, color: Color(0xFF5C5C99)), overflow: TextOverflow.ellipsis),
+                                          child: Tooltip(
+                                            message: task.name,
+                                            child: SizedBox(
+                                              width: 120,
+                                              child: Text(task.name, style: const TextStyle(decoration: TextDecoration.underline, color: Color(0xFF5C5C99)), overflow: TextOverflow.ellipsis),
+                                            ),
                                           ),
                                         )),
                                         DataCell(GestureDetector(
@@ -707,7 +710,10 @@ class _DependenciesState extends State<Dependencies> {
                                             ),
                                           ),
                                         )),
-                                        DataCell(SizedBox(width: 150, child: Text(task.taskOwner, overflow: TextOverflow.ellipsis))),
+                                        DataCell(Tooltip(
+                                          message: task.taskOwner,
+                                          child: SizedBox(width: 150, child: Text(task.taskOwner, overflow: TextOverflow.ellipsis)),
+                                        )),
                                         DataCell(
                                           SizedBox(
                                             width: 80,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'header.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/services/project_store.dart';
-import 'create_new_project.dart';
 
 class MyProjects extends StatefulWidget {
   @override
@@ -39,13 +38,32 @@ class _MyProjectsState extends State<MyProjects> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'My Projects',
-              textAlign: TextAlign.left,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF5C5C99),
-                    fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'My Projects',
+                  textAlign: TextAlign.left,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: const Color(0xFF5C5C99),
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                SizedBox(
+                  width: 100,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/create_new_project');
+                    },
+                    icon: const Icon(Icons.add, size: 18),
+                    tooltip: 'Create New Project',
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF5C5C99),
+                      foregroundColor: Colors.white,
+                    ),
                   ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Text(

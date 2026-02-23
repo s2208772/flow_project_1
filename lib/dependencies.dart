@@ -41,15 +41,12 @@ class _DependenciesState extends State<Dependencies> {
   Future<void> _loadTasks() async {
     final project = widget.project ?? ModalRoute.of(context)?.settings.arguments as Project?;
     if (project != null) {
-      // Fetch fresh project data from Firestore to get updated members list
-      final freshProject = await ProjectStore.instance.getProject(project.name);
+      final updatedProject = await ProjectStore.instance.getProject(project.name);
       final loadedTasks = await TaskStore.instance.getTasksByProject(project.name);
-      
-      // Fetch user names for all team members
-      await _loadUserNames(freshProject?.allTeamMembers ?? []);
+      await _loadUserNames(updatedProject?.allTeamMembers ?? []);
       
       setState(() {
-        _project = freshProject;
+        _project = updatedProject;
         tasks = loadedTasks;
       });
     }

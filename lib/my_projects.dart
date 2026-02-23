@@ -101,6 +101,7 @@ class _MyProjectsState extends State<MyProjects> {
                                 setDialogState(() {
                                   currentMembers.remove(member);
                                 });
+                                setState(() {});
                               },
                               tooltip: 'Remove member',
                               padding: EdgeInsets.zero,
@@ -117,17 +118,28 @@ class _MyProjectsState extends State<MyProjects> {
                         controller: memberController,
                         decoration: const InputDecoration(
                           labelText: 'Add new member',
-                          hintText: 'Enter name or email',
+                          hintText: 'Enter member email',
                           border: OutlineInputBorder(),
                           isDense: true,
                         ),
+                        keyboardType: TextInputType.emailAddress,
                         onSubmitted: (value) async {
-                          if (value.trim().isNotEmpty && !currentMembers.contains(value.trim())) {
-                            await ProjectStore.instance.addMember(project.name, value.trim());
+                          final email = value.trim().toLowerCase();
+                          if (email.isEmpty) return;
+                          
+                          try {
+                            await ProjectStore.instance.addMember(project.name, email);
+                            // Refresh project to get updated member list
+                            final updatedProject = await ProjectStore.instance.getProject(project.name);
                             setDialogState(() {
-                              currentMembers.add(value.trim());
+                              if (updatedProject != null) {
+                                currentMembers = List.from(updatedProject.members);
+                              }
                             });
                             memberController.clear();
+                            setState(() {});
+                          } catch (e) {
+                            // Error handling placeholder - to be implemented during testing
                           }
                         },
                       ),
@@ -135,13 +147,22 @@ class _MyProjectsState extends State<MyProjects> {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () async {
-                        final value = memberController.text.trim();
-                        if (value.isNotEmpty && !currentMembers.contains(value)) {
-                          await ProjectStore.instance.addMember(project.name, value);
+                        final email = memberController.text.trim().toLowerCase();
+                        if (email.isEmpty) return;
+                        
+                        try {
+                          await ProjectStore.instance.addMember(project.name, email);
+                          // Refresh project to get updated member list
+                          final updatedProject = await ProjectStore.instance.getProject(project.name);
                           setDialogState(() {
-                            currentMembers.add(value);
+                            if (updatedProject != null) {
+                              currentMembers = List.from(updatedProject.members);
+                            }
                           });
                           memberController.clear();
+                          setState(() {});
+                        } catch (e) {
+                          // Error handling placeholder - to be implemented during testing
                         }
                       },
                       style: ElevatedButton.styleFrom(

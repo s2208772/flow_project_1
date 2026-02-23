@@ -11,19 +11,32 @@ class ProjectStore {
 
   String? get _currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
-  /// Get only projects belonging to the current user
+  /// Get projects where the current user is owner or member
   Future<List<Project>> getProjects() async {
     final userId = _currentUserId;
     if (userId == null) return [];
     
-    final snapshot = await _projectsCollection
-        .where('userId', isEqualTo: userId)
-        .get();
-    return snapshot.docs.map((doc) {
+    // Get all projects
+    final snapshot = await _projectsCollection.get();
+    
+    // Use a Set to track unique project names to avoid duplicates
+    final seenProjectNames = <String>{};
+    final uniqueProjects = <Project>[];
+    
+    // Filter projects where user is owner OR member
+    for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
       data['id'] = doc.id;
-      return Project.fromJson(data);
-    }).toList();
+      final project = Project.fromJson(data);
+      
+      if ((project.userId == userId || project.memberUserIds.contains(userId)) &&
+          !seenProjectNames.contains(project.name)) {
+        seenProjectNames.add(project.name);
+        uniqueProjects.add(project);
+      }
+    }
+    
+    return uniqueProjects;
   }
 
   //Link project to user
@@ -60,29 +73,72 @@ class ProjectStore {
     }
   }
 
-  Future<void> addMember(String projectName, String memberName) async {
+  Future<void> addMember(String projectName, String memberEmail) async {
+    // Look up user by email to get their userId
+    final userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: memberEmail.toLowerCase())
+        .get();
+    
+    if (userQuery.docs.isEmpty) {
+      throw Exception('User with email $memberEmail not found');
+    }
+    
+    final memberUserId = userQuery.docs.first.id;
+    
     final snapshot = await _projectsCollection
         .where('name', isEqualTo: projectName)
         .get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
+      final projectOwnerId = data['userId'] as String?;
+      
+      // Don't add the owner as a member
+      if (memberUserId == projectOwnerId) {
+        throw Exception('Cannot add project owner as a member');
+      }
+      
       final currentMembers = List<String>.from(data['members'] ?? []);
-      if (!currentMembers.contains(memberName)) {
-        currentMembers.add(memberName);
-        await doc.reference.update({'members': currentMembers});
+      final currentMemberIds = List<String>.from(data['memberUserIds'] ?? []);
+      
+      if (!currentMemberIds.contains(memberUserId)) {
+        currentMembers.add(memberEmail.toLowerCase());
+        currentMemberIds.add(memberUserId);
+        await doc.reference.update({
+          'members': currentMembers,
+          'memberUserIds': currentMemberIds,
+        });
       }
     }
   }
 
-  Future<void> removeMember(String projectName, String memberName) async {
+  Future<void> removeMember(String projectName, String memberEmail) async {
+    // Look up user by email
+    final userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: memberEmail.toLowerCase())
+        .get();
+    
+    if (userQuery.docs.isEmpty) {
+      return; // User not found, nothing to remove
+    }
+    
+    final memberUserId = userQuery.docs.first.id;
+    
     final snapshot = await _projectsCollection
         .where('name', isEqualTo: projectName)
         .get();
     for (var doc in snapshot.docs) {
       final data = doc.data() as Map<String, dynamic>;
       final currentMembers = List<String>.from(data['members'] ?? []);
-      currentMembers.remove(memberName);
-      await doc.reference.update({'members': currentMembers});
+      final currentMemberIds = List<String>.from(data['memberUserIds'] ?? []);
+      
+      currentMembers.remove(memberEmail.toLowerCase());
+      currentMemberIds.remove(memberUserId);
+      await doc.reference.update({
+        'members': currentMembers,
+        'memberUserIds': currentMemberIds,
+      });
     }
   }
 

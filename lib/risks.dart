@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/risk.dart';
 import 'package:flow_project_1/services/risk_store.dart';
+import 'package:flow_project_1/services/project_store.dart';
 import 'project_header.dart';
 
 class Risks extends StatefulWidget {
@@ -14,10 +16,12 @@ class Risks extends StatefulWidget {
 
 class _RisksState extends State<Risks> {
   List<Risk> risks = [];
+  Project? _project;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
+  final Map<String, String> _userNames = {};
 
   @override
   void initState() {
@@ -36,11 +40,46 @@ class _RisksState extends State<Risks> {
   Future<void> _loadRisks() async {
     final project = widget.project ?? ModalRoute.of(context)?.settings.arguments as Project?;
     if (project != null) {
+      final updatedProject = await ProjectStore.instance.getProject(project.name);
       final loadedRisks = await RiskStore.instance.getRisksByProject(project.name);
+      await _loadUserNames(updatedProject?.allTeamMembers ?? []);
+      
       setState(() {
+        _project = updatedProject;
         risks = loadedRisks;
       });
     }
+  }
+
+  Future<void> _loadUserNames(List<String> emails) async {
+    final names = <String, String>{};
+    for (final email in emails) {
+      try {
+        final userQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: email.toLowerCase())
+            .limit(1)
+            .get();
+        
+        if (userQuery.docs.isNotEmpty) {
+          final userData = userQuery.docs.first.data();
+          names[email] = userData['name'] ?? email;
+        } else {
+          names[email] = email;
+        }
+      } catch (e) {
+        names[email] = email;
+      }
+    }
+    _userNames.addAll(names);
+  }
+
+  String _getDisplayName(String email) {
+    final name = _userNames[email];
+    if (name != null && name.isNotEmpty && name != email) {
+      return '$name ($email)';
+    }
+    return email;
   }
 
   void _addRisk(Project? project) {
@@ -108,10 +147,15 @@ class _RisksState extends State<Risks> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: selectedOwner,
-                  items: project?.allTeamMembers.map((member) => DropdownMenuItem(
-                    value: member,
-                    child: Text(member == project.owner ? '$member (Project Manager)' : member),
-                  )).toList() ?? [],
+                  items: project?.allTeamMembers.map((member) {
+                    final displayText = member == project.owner 
+                        ? '${_getDisplayName(member)} - Project Manager' 
+                        : _getDisplayName(member);
+                    return DropdownMenuItem(
+                      value: member,
+                      child: Text(displayText),
+                    );
+                  }).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {
                       selectedOwner = value;
@@ -242,10 +286,15 @@ class _RisksState extends State<Risks> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: selectedOwner,
-                  items: project?.allTeamMembers.map((member) => DropdownMenuItem(
-                    value: member,
-                    child: Text(member == project.owner ? '$member (Project Manager)' : member),
-                  )).toList() ?? [],
+                  items: project?.allTeamMembers.map((member) {
+                    final displayText = member == project.owner 
+                        ? '${_getDisplayName(member)} - Project Manager' 
+                        : _getDisplayName(member);
+                    return DropdownMenuItem(
+                      value: member,
+                      child: Text(displayText),
+                    );
+                  }).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {
                       selectedOwner = value;

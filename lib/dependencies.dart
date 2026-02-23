@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/task.dart';
 import 'package:flow_project_1/services/task_store.dart';
@@ -21,6 +22,7 @@ class _DependenciesState extends State<Dependencies> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
+  Map<String, String> _userNames = {};
 
   @override
   void initState() {
@@ -42,11 +44,46 @@ class _DependenciesState extends State<Dependencies> {
       // Fetch fresh project data from Firestore to get updated members list
       final freshProject = await ProjectStore.instance.getProject(project.name);
       final loadedTasks = await TaskStore.instance.getTasksByProject(project.name);
+      
+      // Fetch user names for all team members
+      await _loadUserNames(freshProject?.allTeamMembers ?? []);
+      
       setState(() {
         _project = freshProject;
         tasks = loadedTasks;
       });
     }
+  }
+
+  Future<void> _loadUserNames(List<String> emails) async {
+    final names = <String, String>{};
+    for (final email in emails) {
+      try {
+        final userQuery = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: email.toLowerCase())
+            .limit(1)
+            .get();
+        
+        if (userQuery.docs.isNotEmpty) {
+          final userData = userQuery.docs.first.data();
+          names[email] = userData['name'] ?? email;
+        } else {
+          names[email] = email; // Fallback to email if user not found
+        }
+      } catch (e) {
+        names[email] = email; // Fallback to email on error
+      }
+    }
+    _userNames = names;
+  }
+
+  String _getDisplayName(String email) {
+    final name = _userNames[email];
+    if (name != null && name.isNotEmpty && name != email) {
+      return '$name ($email)';
+    }
+    return email;
   }
 
   void _addTask() {
@@ -130,10 +167,15 @@ class _DependenciesState extends State<Dependencies> {
                 child: StatefulBuilder(
                   builder: (context, setDialogState) => DropdownButtonFormField<String>(
                     value: selectedOwner,
-                    items: _project?.allTeamMembers.map((member) => DropdownMenuItem(
-                      value: member,
-                      child: Text(member == _project?.owner ? '$member (Project Manager)' : member),
-                    )).toList() ?? [],
+                    items: _project?.allTeamMembers.map((member) {
+                      final displayText = member == _project?.owner 
+                          ? '${_getDisplayName(member)} - Project Manager' 
+                          : _getDisplayName(member);
+                      return DropdownMenuItem(
+                        value: member,
+                        child: Text(displayText),
+                      );
+                    }).toList() ?? [],
                     onChanged: (value) {
                       setDialogState(() {
                         selectedOwner = value;
@@ -382,10 +424,15 @@ class _DependenciesState extends State<Dependencies> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: DropdownButtonFormField<String>(
                   value: selectedOwner,
-                  items: _project?.allTeamMembers.map((member) => DropdownMenuItem(
-                    value: member,
-                    child: Text(member == _project?.owner ? '$member (Project Manager)' : member),
-                  )).toList() ?? [],
+                  items: _project?.allTeamMembers.map((member) {
+                    final displayText = member == _project?.owner 
+                        ? '${_getDisplayName(member)} - Project Manager' 
+                        : _getDisplayName(member);
+                    return DropdownMenuItem(
+                      value: member,
+                      child: Text(displayText),
+                    );
+                  }).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {
                       selectedOwner = value;

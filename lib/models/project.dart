@@ -6,6 +6,7 @@ class Project {
   final String status;
   final String? userId;
   final List<String> members;
+  final List<String> memberUserIds;
 
   Project({
     required this.name,
@@ -15,7 +16,9 @@ class Project {
     required this.status,
     this.userId,
     List<String>? members,
-  }) : members = members ?? [];
+    List<String>? memberUserIds,
+  }) : members = members ?? [],
+       memberUserIds = memberUserIds ?? [];
 
   factory Project.fromJson(Map<String, dynamic> json) => Project(
         name: json['name'] as String,
@@ -28,6 +31,9 @@ class Project {
         members: json['members'] != null 
             ? List<String>.from(json['members']) 
             : [],
+        memberUserIds: json['memberUserIds'] != null 
+            ? List<String>.from(json['memberUserIds']) 
+            : [],
       );
 
   Map<String, dynamic> toJson() => {
@@ -38,6 +44,7 @@ class Project {
         'status': status,
         'userId': userId,
         'members': members,
+        'memberUserIds': memberUserIds,
       };
 
   List<String> get allTeamMembers {
@@ -48,6 +55,7 @@ class Project {
   Project copyWith({
     String? status,
     List<String>? members,
+    List<String>? memberUserIds,
   }) => Project(
         name: name,
         owner: owner,
@@ -56,5 +64,6 @@ class Project {
         status: status ?? this.status,
         userId: userId,
         members: members ?? this.members,
+        memberUserIds: memberUserIds ?? this.memberUserIds,
       );
 }

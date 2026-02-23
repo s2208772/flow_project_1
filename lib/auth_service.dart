@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpSignIn extends StatefulWidget {
   const SignUpSignIn({super.key});
@@ -10,6 +11,7 @@ class SignUpSignIn extends StatefulWidget {
 
 class _SignUpSignInState extends State<SignUpSignIn> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -22,6 +24,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -39,10 +42,22 @@ class _SignUpSignInState extends State<SignUpSignIn> {
     try {
       if (_isSignUp) {
         // Sign Up
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+        
+        // Create user profile in Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .set({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim().toLowerCase(),
+          'displayName': _emailController.text.trim().split('@')[0],
+          'createdAt': FieldValue.serverTimestamp(),
+        });
       } else {
         // Sign In
         await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -165,6 +180,30 @@ class _SignUpSignInState extends State<SignUpSignIn> {
                     const SizedBox(height: 16),
                   ],
 
+                  //Name Field
+                  if (_isSignUp) ...[
+                    TextFormField(
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      decoration: InputDecoration(
+                        labelText: 'Name',
+                        prefixIcon: const Icon(Icons.person_outline),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
                   // Email Field
                   TextFormField(
                     controller: _emailController,
@@ -190,7 +229,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Password Field
+                  // Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
@@ -225,7 +264,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Confirm Password Field (Sign Up only)
+                  // Confirm Password
                   if (_isSignUp) ...[
                     TextFormField(
                       controller: _confirmPasswordController,

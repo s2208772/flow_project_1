@@ -26,9 +26,11 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    if (confirm == true) {
+    if (confirm == true && context.mounted) {
       await FirebaseAuth.instance.signOut();
-      // The AuthWrapper will automatically show the AuthPage
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     }
   }
 

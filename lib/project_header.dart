@@ -29,8 +29,12 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    if (confirm == true) {
+    if (confirm == true && context.mounted) {
       await FirebaseAuth.instance.signOut();
+      // Navigate to root and clear navigation stack
+      if (context.mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
     }
   }
 

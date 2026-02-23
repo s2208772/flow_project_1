@@ -58,7 +58,6 @@ class _DependenciesState extends State<Dependencies> {
   Future<void> _loadUserNames(List<String> emails) async {
     final names = <String, String>{};
     for (final email in emails) {
-      try {
         final userQuery = await FirebaseFirestore.instance
             .collection('users')
             .where('email', isEqualTo: email.toLowerCase())
@@ -69,11 +68,8 @@ class _DependenciesState extends State<Dependencies> {
           final userData = userQuery.docs.first.data();
           names[email] = userData['name'] ?? email;
         } else {
-          names[email] = email; // Fallback to email if user not found
+          names[email] = email;
         }
-      } catch (e) {
-        names[email] = email; // Fallback to email on error
-      }
     }
     _userNames = names;
   }

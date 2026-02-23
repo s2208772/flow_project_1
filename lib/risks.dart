@@ -16,7 +16,6 @@ class Risks extends StatefulWidget {
 
 class _RisksState extends State<Risks> {
   List<Risk> risks = [];
-  Project? _project;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
@@ -45,7 +44,6 @@ class _RisksState extends State<Risks> {
       await _loadUserNames(updatedProject?.allTeamMembers ?? []);
       
       setState(() {
-        _project = updatedProject;
         risks = loadedRisks;
       });
     }
@@ -54,7 +52,6 @@ class _RisksState extends State<Risks> {
   Future<void> _loadUserNames(List<String> emails) async {
     final names = <String, String>{};
     for (final email in emails) {
-      try {
         final userQuery = await FirebaseFirestore.instance
             .collection('users')
             .where('email', isEqualTo: email.toLowerCase())
@@ -67,9 +64,6 @@ class _RisksState extends State<Risks> {
         } else {
           names[email] = email;
         }
-      } catch (e) {
-        names[email] = email;
-      }
     }
     _userNames.addAll(names);
   }

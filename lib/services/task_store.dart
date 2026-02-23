@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/task.dart';
+import 'package:flow_project_1/services/activity_log_store.dart';
 
 class TaskStore {
   static final TaskStore instance = TaskStore._();
@@ -22,6 +23,12 @@ class TaskStore {
   /// Add a task for a project
   Future<void> addTask(Task task) async {
     await _tasksCollection.add(task.toJson());
+    await ActivityLogStore.instance.logActivity(
+      projectId: task.projectId,
+      action: 'added',
+      itemType: 'task',
+      itemName: task.name,
+    );
   }
 
   /// Update a task
@@ -33,10 +40,16 @@ class TaskStore {
     for (var doc in snapshot.docs) {
       await doc.reference.update(task.toJson());
     }
+    await ActivityLogStore.instance.logActivity(
+      projectId: task.projectId,
+      action: 'edited',
+      itemType: 'task',
+      itemName: task.name,
+    );
   }
 
   /// Delete a task
-  Future<void> deleteTask(String taskId, String projectName) async {
+  Future<void> deleteTask(String taskId, String projectName, {String? taskName}) async {
     final snapshot = await _tasksCollection
         .where('id', isEqualTo: taskId)
         .where('projectId', isEqualTo: projectName)
@@ -44,6 +57,12 @@ class TaskStore {
     for (var doc in snapshot.docs) {
       await doc.reference.delete();
     }
+    await ActivityLogStore.instance.logActivity(
+      projectId: projectName,
+      action: 'deleted',
+      itemType: 'task',
+      itemName: taskName ?? 'Task $taskId',
+    );
   }
 
   /// Clear all tasks for a project

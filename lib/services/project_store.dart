@@ -9,7 +9,6 @@ class ProjectStore {
   final CollectionReference _projectsCollection =
       FirebaseFirestore.instance.collection('projects');
 
-  /// Get the current user's ID
   String? get _currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
   /// Get only projects belonging to the current user
@@ -27,7 +26,7 @@ class ProjectStore {
     }).toList();
   }
 
-  /// Add a project with the current user's ID
+  //Link project to user
   Future<void> addProject(Project project) async {
     final userId = _currentUserId;
     if (userId == null) return;
@@ -59,6 +58,43 @@ class ProjectStore {
     for (var doc in snapshot.docs) {
       await doc.reference.update({'status': newStatus});
     }
+  }
+
+  Future<void> addMember(String projectName, String memberName) async {
+    final snapshot = await _projectsCollection
+        .where('name', isEqualTo: projectName)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final currentMembers = List<String>.from(data['members'] ?? []);
+      if (!currentMembers.contains(memberName)) {
+        currentMembers.add(memberName);
+        await doc.reference.update({'members': currentMembers});
+      }
+    }
+  }
+
+  Future<void> removeMember(String projectName, String memberName) async {
+    final snapshot = await _projectsCollection
+        .where('name', isEqualTo: projectName)
+        .get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final currentMembers = List<String>.from(data['members'] ?? []);
+      currentMembers.remove(memberName);
+      await doc.reference.update({'members': currentMembers});
+    }
+  }
+
+  Future<Project?> getProject(String projectName) async {
+    final snapshot = await _projectsCollection
+        .where('name', isEqualTo: projectName)
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      final data = snapshot.docs.first.data() as Map<String, dynamic>;
+      return Project.fromJson(data);
+    }
+    return null;
   }
 
   Future<void> clear() async {

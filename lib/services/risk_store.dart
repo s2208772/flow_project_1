@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/risk.dart';
+import 'package:flow_project_1/services/activity_log_store.dart';
 
 class RiskStore {
   static final RiskStore instance = RiskStore._();
@@ -22,6 +23,12 @@ class RiskStore {
   /// Add a risk for a project
   Future<void> addRisk(Risk risk) async {
     await _risksCollection.add(risk.toJson());
+    await ActivityLogStore.instance.logActivity(
+      projectId: risk.projectId,
+      action: 'added',
+      itemType: 'risk',
+      itemName: risk.description,
+    );
   }
 
   /// Update risk
@@ -33,10 +40,16 @@ class RiskStore {
     for (var doc in snapshot.docs) {
       await doc.reference.update(risk.toJson());
     }
+    await ActivityLogStore.instance.logActivity(
+      projectId: risk.projectId,
+      action: 'edited',
+      itemType: 'risk',
+      itemName: risk.description,
+    );
   }
 
   /// Delete risk
-  Future<void> deleteRisk(String riskId, String projectName) async {
+  Future<void> deleteRisk(String riskId, String projectName, {String? riskDescription}) async {
     final snapshot = await _risksCollection
         .where('id', isEqualTo: riskId)
         .where('projectId', isEqualTo: projectName)
@@ -44,6 +57,12 @@ class RiskStore {
     for (var doc in snapshot.docs) {
       await doc.reference.delete();
     }
+    await ActivityLogStore.instance.logActivity(
+      projectId: projectName,
+      action: 'deleted',
+      itemType: 'risk',
+      itemName: riskDescription ?? 'Risk $riskId',
+    );
   }
 
   /// Clear all risks for project

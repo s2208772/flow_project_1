@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/task.dart';
 import 'package:flow_project_1/services/task_store.dart';
+import 'package:flow_project_1/services/project_store.dart';
 import 'project_header.dart';
 
 class Dependencies extends StatefulWidget {
@@ -15,6 +16,7 @@ class Dependencies extends StatefulWidget {
 
 class _DependenciesState extends State<Dependencies> {
   List<Task> tasks = [];
+  Project? _project;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
@@ -37,17 +39,20 @@ class _DependenciesState extends State<Dependencies> {
   Future<void> _loadTasks() async {
     final project = widget.project ?? ModalRoute.of(context)?.settings.arguments as Project?;
     if (project != null) {
+      // Fetch fresh project data from Firestore to get updated members list
+      final freshProject = await ProjectStore.instance.getProject(project.name);
       final loadedTasks = await TaskStore.instance.getTasksByProject(project.name);
       setState(() {
+        _project = freshProject;
         tasks = loadedTasks;
       });
     }
   }
 
-  void _addTask(Project? project) {
+  void _addTask() {
     final taskNameController = TextEditingController();
     final notesController = TextEditingController();
-    String? selectedOwner = project?.owner;
+    String? selectedOwner = _project?.owner;
     DateTime? startDate;
     DateTime? finishDate;
     DateTime? actualStartDate;
@@ -125,12 +130,10 @@ class _DependenciesState extends State<Dependencies> {
                 child: StatefulBuilder(
                   builder: (context, setDialogState) => DropdownButtonFormField<String>(
                     value: selectedOwner,
-                    items: [
-                      DropdownMenuItem(
-                        value: project?.owner,
-                        child: Text('${project?.owner ?? 'No members'} (Project Manager)'),
-                      ),
-                    ],
+                    items: _project?.allTeamMembers.map((member) => DropdownMenuItem(
+                      value: member,
+                      child: Text(member == _project?.owner ? '$member (Project Manager)' : member),
+                    )).toList() ?? [],
                     onChanged: (value) {
                       setDialogState(() {
                         selectedOwner = value;
@@ -221,7 +224,7 @@ class _DependenciesState extends State<Dependencies> {
                   finishDate: finishDate!,
                   notes: notesController.text,
                   taskOwner: selectedOwner ?? '',
-                  projectId: project?.name ?? '',
+                  projectId: _project?.name ?? '',
                   actualStartDate: actualStartDate,
                   actualFinishDate: actualFinishDate,
                 );
@@ -250,7 +253,7 @@ class _DependenciesState extends State<Dependencies> {
     );
   }
 
-  void _editTask(Task task, Project? project) {
+  void _editTask(Task task) {
     final taskNameController = TextEditingController(text: task.name);
     final notesController = TextEditingController(text: task.notes);
     String? selectedOwner = task.taskOwner;
@@ -379,12 +382,10 @@ class _DependenciesState extends State<Dependencies> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: DropdownButtonFormField<String>(
                   value: selectedOwner,
-                  items: [
-                    DropdownMenuItem(
-                      value: project?.owner,
-                      child: Text('${project?.owner ?? 'No members'} (Project Manager)'),
-                    ),
-                  ],
+                  items: _project?.allTeamMembers.map((member) => DropdownMenuItem(
+                    value: member,
+                    child: Text(member == _project?.owner ? '$member (Project Manager)' : member),
+                  )).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {
                       selectedOwner = value;
@@ -541,13 +542,13 @@ class _DependenciesState extends State<Dependencies> {
       setState(() {
         tasks.removeWhere((t) => t.id == task.id);
       });
-      TaskStore.instance.deleteTask(task.id, task.projectId);
+      TaskStore.instance.deleteTask(task.id, task.projectId, taskName: task.name);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final project = widget.project ?? ModalRoute.of(context)?.settings.arguments as Project?;
+    final project = _project ?? widget.project ?? ModalRoute.of(context)?.settings.arguments as Project?;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF0F0EA),
@@ -595,7 +596,7 @@ class _DependenciesState extends State<Dependencies> {
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton.icon(
-                      onPressed: () => _addTask(project),
+                      onPressed: () => _addTask(),
                       icon: const Icon(Icons.add),
                       label: const Text('Add new task'),
                       style: ElevatedButton.styleFrom(
@@ -667,11 +668,11 @@ class _DependenciesState extends State<Dependencies> {
                                     task.name.toLowerCase().contains(_searchQuery) ||
                                     task.id.toLowerCase().contains(_searchQuery))
                                 .map((task) => DataRow(
-                                      onSelectChanged: (_) => _editTask(task, project),
+                                      onSelectChanged: (_) => _editTask(task),
                                       cells: [
                                         DataCell(SizedBox(width: 50, child: Text(task.id))),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: Tooltip(
                                             message: task.name,
                                             child: SizedBox(
@@ -681,23 +682,23 @@ class _DependenciesState extends State<Dependencies> {
                                           ),
                                         )),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: SizedBox(width: 115, child: Text(DateFormat('dd MMM yyyy').format(task.startDate))),
                                         )),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: SizedBox(width: 115, child: Text(DateFormat('dd MMM yyyy').format(task.finishDate))),
                                         )),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: SizedBox(width: 115, child: Text(task.actualStartDate != null ? DateFormat('dd MMM yyyy').format(task.actualStartDate!) : '-')),
                                         )),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: SizedBox(width: 115, child: Text(task.actualFinishDate != null ? DateFormat('dd MMM yyyy').format(task.actualFinishDate!) : '-')),
                                         )),
                                         DataCell(GestureDetector(
-                                          onTap: () => _editTask(task, project),
+                                          onTap: () => _editTask(task),
                                           child: Tooltip(
                                             message: task.notes,
                                             child: SizedBox(
@@ -722,7 +723,7 @@ class _DependenciesState extends State<Dependencies> {
                                               children: [
                                                 IconButton(
                                                   icon: const Icon(Icons.edit, color: Color(0xFF5C5C99), size: 18),
-                                                  onPressed: () => _editTask(task, project),
+                                                  onPressed: () => _editTask(task),
                                                   tooltip: 'Edit',
                                                   padding: EdgeInsets.zero,
                                                   constraints: const BoxConstraints(),

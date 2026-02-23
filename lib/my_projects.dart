@@ -28,6 +28,146 @@ class _MyProjectsState extends State<MyProjects> {
     await _projectsFuture;
   }
 
+  void _showMembersDialog(Project project) {
+    final memberController = TextEditingController();
+    List<String> currentMembers = List.from(project.members);
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text(
+            'Manage Team Members',
+            style: TextStyle(color: Color(0xFF5C5C99), fontWeight: FontWeight.bold),
+          ),
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Project: ${project.name}'),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5C5C99).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.person, color: Color(0xFF5C5C99), size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${project.owner} (Project Manager)',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Team Members:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                if (currentMembers.isEmpty)
+                  const Text(
+                    'No additional members yet.',
+                    style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  )
+                else
+                  ...currentMembers.map((member) => Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.person_outline, size: 18),
+                                const SizedBox(width: 8),
+                                Text(member),
+                              ],
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, size: 18, color: Colors.red),
+                              onPressed: () async {
+                                await ProjectStore.instance.removeMember(project.name, member);
+                                setDialogState(() {
+                                  currentMembers.remove(member);
+                                });
+                              },
+                              tooltip: 'Remove member',
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      )),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: memberController,
+                        decoration: const InputDecoration(
+                          labelText: 'Add new member',
+                          hintText: 'Enter name or email',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        onSubmitted: (value) async {
+                          if (value.trim().isNotEmpty && !currentMembers.contains(value.trim())) {
+                            await ProjectStore.instance.addMember(project.name, value.trim());
+                            setDialogState(() {
+                              currentMembers.add(value.trim());
+                            });
+                            memberController.clear();
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final value = memberController.text.trim();
+                        if (value.isNotEmpty && !currentMembers.contains(value)) {
+                          await ProjectStore.instance.addMember(project.name, value);
+                          setDialogState(() {
+                            currentMembers.add(value);
+                          });
+                          memberController.clear();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5C5C99),
+                      ),
+                      child: const Text('Add', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _refresh();
+              },
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -177,7 +317,7 @@ class _MyProjectsState extends State<MyProjects> {
                                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Deleted: ${p.name}')));
                                       }
                                     } else if (value == 'add_members') {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Add members to: ${p.name}')));
+                                      _showMembersDialog(p);
                                     } else if (value == 'change_status') {
                                       final statuses = ['New', 'In progress', 'On hold', 'Completed', 'Cancelled', 'Archived'];
                                       final newStatus = await showDialog<String>(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/activity_log.dart';
 import 'package:flow_project_1/services/activity_log_store.dart';
@@ -15,7 +14,6 @@ class Summary extends StatefulWidget {
 class _SummaryState extends State<Summary> {
   List<ActivityLog> _recentActivities = [];
   List<ActivityLog> _newActivities = [];
-  DateTime? _lastVisit;
   bool _isLoading = true;
 
   @override
@@ -38,7 +36,6 @@ class _SummaryState extends State<Summary> {
       final recentActivities = await ActivityLogStore.instance.getRecentActivities(project.name);
       
       setState(() {
-        _lastVisit = lastVisit;
         _newActivities = newActivities;
         _recentActivities = recentActivities;
         _isLoading = false;

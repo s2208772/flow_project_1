@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/risk.dart';
 import 'package:flow_project_1/services/risk_store.dart';
-import 'package:flow_project_1/services/project_store.dart';
 import 'project_header.dart';
 
 class Risks extends StatefulWidget {
@@ -15,7 +14,6 @@ class Risks extends StatefulWidget {
 
 class _RisksState extends State<Risks> {
   List<Risk> risks = [];
-  Project? _project;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
@@ -112,7 +110,7 @@ class _RisksState extends State<Risks> {
                   value: selectedOwner,
                   items: project?.allTeamMembers.map((member) => DropdownMenuItem(
                     value: member,
-                    child: Text(member == project?.owner ? '$member (Project Manager)' : member),
+                    child: Text(member == project.owner ? '$member (Project Manager)' : member),
                   )).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {
@@ -246,7 +244,7 @@ class _RisksState extends State<Risks> {
                   value: selectedOwner,
                   items: project?.allTeamMembers.map((member) => DropdownMenuItem(
                     value: member,
-                    child: Text(member == project?.owner ? '$member (Project Manager)' : member),
+                    child: Text(member == project.owner ? '$member (Project Manager)' : member),
                   )).toList() ?? [],
                   onChanged: (value) {
                     setDialogState(() {

@@ -27,7 +27,7 @@ class TaskStore {
       projectId: task.projectId,
       action: 'added',
       itemType: 'task',
-      itemName: task.name,
+      itemName: 'ID:${task.id} - ${task.name}',
     );
   }
 
@@ -44,7 +44,7 @@ class TaskStore {
       projectId: task.projectId,
       action: 'edited',
       itemType: 'task',
-      itemName: task.name,
+      itemName: 'ID:${task.id} - ${task.name}',
     );
   }
 
@@ -61,7 +61,7 @@ class TaskStore {
       projectId: projectName,
       action: 'deleted',
       itemType: 'task',
-      itemName: taskName ?? 'Task $taskId',
+      itemName: 'ID:$taskId - ${taskName ?? 'Task'}',
     );
   }
 

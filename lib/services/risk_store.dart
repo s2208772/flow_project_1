@@ -27,7 +27,7 @@ class RiskStore {
       projectId: risk.projectId,
       action: 'added',
       itemType: 'risk',
-      itemName: risk.description,
+      itemName: 'ID:${risk.id} - ${risk.description}',
     );
   }
 
@@ -44,7 +44,7 @@ class RiskStore {
       projectId: risk.projectId,
       action: 'edited',
       itemType: 'risk',
-      itemName: risk.description,
+      itemName: 'ID:${risk.id} - ${risk.description}',
     );
   }
 
@@ -61,7 +61,7 @@ class RiskStore {
       projectId: projectName,
       action: 'deleted',
       itemType: 'risk',
-      itemName: riskDescription ?? 'Risk $riskId',
+      itemName: 'ID:$riskId - ${riskDescription ?? 'Risk'}',
     );
   }
 

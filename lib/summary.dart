@@ -72,84 +72,110 @@ class _SummaryState extends State<Summary> {
   }
 
   Widget _buildActivityItem(ActivityLog activity, {bool isNew = false}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isNew ? const Color.fromARGB(255, 255, 255, 255) : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: isNew ? Border.all(color: const Color(0xFF5C5C99), width: 2) : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: _getActionColor(activity.action).withOpacity(0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              _getActionIcon(activity.action),
-              color: _getActionColor(activity.action),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      activity.actionDisplay,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: _getActionColor(activity.action),
-                      ),
+    bool isHovered = false;
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return MouseRegion(
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          //Code adapted from (Flutter, n.d.)
+          child: GestureDetector(
+            onTap: () {
+              final project = ModalRoute.of(context)?.settings.arguments as Project?;
+              if (project != null) {
+                if (activity.itemType == 'task') {
+                  Navigator.pushNamed(context, '/dependencies', arguments: project);
+                } else if (activity.itemType == 'risk') {
+                  Navigator.pushNamed(context, '/risks', arguments: project);
+                }
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isHovered 
+                    ? (isNew ? const Color.fromARGB(255, 240, 240, 240) : const Color(0xFFF5F5F5))
+                    : (isNew ? const Color.fromARGB(255, 255, 255, 255) : Colors.white),
+                borderRadius: BorderRadius.circular(8),
+                border: isNew ? Border.all(color: const Color(0xFF5C5C99), width: 2) : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _getActionColor(activity.action).withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      activity.itemTypeDisplay,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    child: Icon(
+                      _getActionIcon(activity.action),
+                      color: _getActionColor(activity.action),
+                      size: 20,
                     ),
-                    if (isNew) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              activity.actionDisplay,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: _getActionColor(activity.action),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              activity.itemTypeDisplay,
+                              style: const TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            if (isNew) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'NEW',
+                                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        child: const Text(
-                          'NEW',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        const SizedBox(height: 4),
+                        Text(
+                          activity.itemName,
+                          style: const TextStyle(color: Colors.black87),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  activity.itemName,
-                  style: const TextStyle(color: Colors.black87),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
+  //End of adapted code
 
   @override
   Widget build(BuildContext context) {
@@ -308,3 +334,6 @@ class _SummaryState extends State<Summary> {
     );
   }
 }
+
+//References
+//Flutter. (n.d.). GestureDetector class - widgets library - Dart API. Api.flutter.dev. https://api.flutter.dev/flutter/widgets/GestureDetector-class.html

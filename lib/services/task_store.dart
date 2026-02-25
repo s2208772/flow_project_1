@@ -20,6 +20,25 @@ class TaskStore {
     }).toList();
   }
 
+  /// Get count of tasks for a user within a project
+  Future<int> getTaskCountForUserByProject({
+    required String projectId,
+    required String owner,
+  }) async {
+    final snapshot = await _tasksCollection
+        .where('projectId', isEqualTo: projectId)
+        .where('taskOwner', isEqualTo: owner)
+        .get();
+    
+    // Filter out completed tasks for user's assigned tasks
+    final openTasks = snapshot.docs.where((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return data['actualFinishDate'] == null;
+    }).length;
+    
+    return openTasks;
+  }
+
   /// Add a task for a project
   Future<void> addTask(Task task) async {
     await _tasksCollection.add(task.toJson());

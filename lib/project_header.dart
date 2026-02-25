@@ -45,7 +45,7 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Image.asset('assets/FLOW.png', height: 45),
           const SizedBox(width: 16),
-          Text('${project.name}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+          Text(project.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
         ],
       ),
       backgroundColor: const Color(0xFF5C5C99),

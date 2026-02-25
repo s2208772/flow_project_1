@@ -20,6 +20,18 @@ class RiskStore {
     }).toList();
   }
 
+  /// Get count of risks for a user within a project
+  Future<int> getRiskCountForUserByProject({
+    required String projectId,
+    required String owner,
+  }) async {
+    final snapshot = await _risksCollection
+        .where('projectId', isEqualTo: projectId)
+        .where('owner', isEqualTo: owner)
+        .get();
+    return snapshot.size;
+  }
+
   /// Add a risk for a project
   Future<void> addRisk(Risk risk) async {
     await _risksCollection.add(risk.toJson());

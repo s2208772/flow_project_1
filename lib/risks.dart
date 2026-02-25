@@ -1,9 +1,12 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/risk.dart';
 import 'package:flow_project_1/services/risk_store.dart';
 import 'package:flow_project_1/services/project_store.dart';
+import 'package:intl/intl.dart';
 import 'project_header.dart';
 
 class Risks extends StatefulWidget {
@@ -83,6 +86,7 @@ class _RisksState extends State<Risks> {
     final notesController = TextEditingController();
     String? selectedSeverity = 'Medium';
     String? selectedOwner = project?.owner;
+    DateTime? selectedOccurrenceDate;
 
     showDialog(
       context: context,
@@ -121,7 +125,7 @@ class _RisksState extends State<Risks> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedSeverity,
+                  initialValue: selectedSeverity,
                   items: const [
                     DropdownMenuItem(value: 'Low', child: Text('Low')),
                     DropdownMenuItem(value: 'Medium', child: Text('Medium')),
@@ -139,8 +143,40 @@ class _RisksState extends State<Risks> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                InkWell(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: selectedOccurrenceDate ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setDialogState(() {
+                        selectedOccurrenceDate = date;
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Expected Occurrence Date',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      selectedOccurrenceDate == null 
+                        ? 'Select date' 
+                        : DateFormat('dd MMM yyyy').format(selectedOccurrenceDate!),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: selectedOccurrenceDate == null ? Colors.grey : Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedOwner,
+                  initialValue: selectedOwner,
                   items: project?.allTeamMembers.map((member) {
                     final displayText = member == project.owner 
                         ? '${_getDisplayName(member)} - Project Manager' 
@@ -179,13 +215,14 @@ class _RisksState extends State<Risks> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (descriptionController.text.isNotEmpty) {
+                if (descriptionController.text.isNotEmpty && selectedOccurrenceDate != null) {
                   final newRisk = Risk(
                     id: (risks.length + 1).toString(),
                     description: descriptionController.text,
                     impact: impactController.text,
                     response: responseController.text,
                     severity: selectedSeverity ?? 'Medium',
+                    occurrenceDate: selectedOccurrenceDate!,
                     owner: selectedOwner ?? '',
                     notes: notesController.text,
                     projectId: project?.name ?? '',
@@ -197,7 +234,11 @@ class _RisksState extends State<Risks> {
                   Navigator.pop(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a description')),
+                    SnackBar(content: Text(
+                      descriptionController.text.isEmpty 
+                        ? 'Please enter a description' 
+                        : 'Please select an expected occurrence date'
+                    )),
                   );
                 }
               },
@@ -222,6 +263,7 @@ class _RisksState extends State<Risks> {
     final notesController = TextEditingController(text: risk.notes);
     String? selectedSeverity = risk.severity;
     String? selectedOwner = risk.owner;
+    DateTime? selectedOccurrenceDate = risk.occurrenceDate;
 
     showDialog(
       context: context,
@@ -260,7 +302,7 @@ class _RisksState extends State<Risks> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedSeverity,
+                  initialValue: selectedSeverity,
                   items: const [
                     DropdownMenuItem(value: 'Low', child: Text('Low')),
                     DropdownMenuItem(value: 'Medium', child: Text('Medium')),
@@ -278,8 +320,40 @@ class _RisksState extends State<Risks> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                InkWell(
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: selectedOccurrenceDate ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) {
+                      setDialogState(() {
+                        selectedOccurrenceDate = date;
+                      });
+                    }
+                  },
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Expected Occurrence Date',
+                      border: OutlineInputBorder(),
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      selectedOccurrenceDate == null 
+                        ? 'Select date' 
+                        : DateFormat('dd MMM yyyy').format(selectedOccurrenceDate!),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: selectedOccurrenceDate == null ? Colors.grey : Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedOwner,
+                  initialValue: selectedOwner,
                   items: project?.allTeamMembers.map((member) {
                     final displayText = member == project.owner 
                         ? '${_getDisplayName(member)} - Project Manager' 
@@ -324,6 +398,7 @@ class _RisksState extends State<Risks> {
                   impact: impactController.text,
                   response: responseController.text,
                   severity: selectedSeverity ?? 'Medium',
+                  occurrenceDate: selectedOccurrenceDate ?? risk.occurrenceDate,
                   owner: selectedOwner ?? '',
                   notes: notesController.text,
                   projectId: risk.projectId,
@@ -482,7 +557,7 @@ class _RisksState extends State<Risks> {
                               controller: _horizontalScrollController,
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
-                                width: 1400,
+                                width: 1520,
                                 child: DataTable(
                                   showCheckboxColumn: false,
                                   columns: const [
@@ -491,6 +566,7 @@ class _RisksState extends State<Risks> {
                                     DataColumn(label: Text('Impact')),
                                     DataColumn(label: Text('Response')),
                                     DataColumn(label: Text('Severity')),
+                                    DataColumn(label: Text('Expected Occurrence')),
                                     DataColumn(label: Text('Owner')),
                                     DataColumn(label: Text('Notes')),
                                     DataColumn(label: Text('Actions')),
@@ -547,6 +623,13 @@ class _RisksState extends State<Risks> {
                                                       fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
+                                                ),
+                                              )),
+                                              DataCell(SizedBox(
+                                                width: 150,
+                                                child: Text(
+                                                  DateFormat('dd MMM yyyy').format(risk.occurrenceDate),
+                                                  overflow: TextOverflow.ellipsis, maxLines: 2,
                                                 ),
                                               )),
                                               DataCell(Tooltip(

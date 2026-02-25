@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -159,7 +161,7 @@ class _DependenciesState extends State<Dependencies> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: StatefulBuilder(
                   builder: (context, setDialogState) => DropdownButtonFormField<String>(
-                    value: selectedOwner,
+                    initialValue: selectedOwner,
                     items: _project?.allTeamMembers.map((member) {
                       final displayText = member == _project?.owner 
                           ? '${_getDisplayName(member)} - Project Manager' 
@@ -416,7 +418,7 @@ class _DependenciesState extends State<Dependencies> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: DropdownButtonFormField<String>(
-                  value: selectedOwner,
+                  initialValue: selectedOwner,
                   items: _project?.allTeamMembers.map((member) {
                     final displayText = member == _project?.owner 
                         ? '${_getDisplayName(member)} - Project Manager' 

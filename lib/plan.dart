@@ -27,7 +27,7 @@ class Plan extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withOpacity(1.0),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -93,16 +93,18 @@ class Plan extends StatelessWidget {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF5C5C99),
-                              shadowColor: Colors.black.withValues(alpha: 10),
+                              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                              side: BorderSide(color: const Color(0xFF5C5C99), width: 5),
+                              shadowColor: const Color(0xFF5C5C99).withOpacity(0.5),
                               minimumSize: const Size(300, 70),
                             ),
                             child:
                             Text(
                               'Whiteboard',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
+                                    color: const Color(0xFF5C5C99),
                                     fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                             ),
                           ),
@@ -110,16 +112,17 @@ class Plan extends StatelessWidget {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF5C5C99),
-                              shadowColor: Colors.black.withValues(alpha: 100),
+                              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                              side: BorderSide(color: const Color(0xFF5C5C99), width: 5),
                               minimumSize: const Size(300, 70),
                             ),
                             child:
                             Text(
                               'Prototype',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white,
+                                    color: const Color(0xFF5C5C99),
                                     fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                             ),
                           ),

@@ -37,10 +37,16 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text('Flow Project (Logo placeholder)'),
+      title: Image.asset('assets/FLOW (2).png', height: 45),
       backgroundColor: const Color(0xFF5C5C99),
       elevation: 0,
       actions: [
+        IconButton(
+            onPressed: () {
+            Navigator.pushNamed(context, '/home');
+          },
+          icon: const Icon(Icons.home, color: Colors.white),
+        ),
         TextButton(
           onPressed: () {
             Navigator.pushNamed(context, '/my_projects');

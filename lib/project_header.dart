@@ -41,10 +41,22 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text('Flow Project - ${project.name}'),
+      title: Row(
+        children: [
+          Image.asset('assets/FLOW.png', height: 45),
+          const SizedBox(width: 16),
+          Text('${project.name}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
+        ],
+      ),
       backgroundColor: const Color(0xFF5C5C99),
       elevation: 0,
       actions: [
+        IconButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/home');
+          },
+          icon: const Icon(Icons.home, color: Colors.white),
+        ),
         TextButton(
           onPressed: () {
             Navigator.pushNamed(context, '/my_projects');

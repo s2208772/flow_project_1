@@ -8,6 +8,7 @@ class Task {
   final String projectId;
   final DateTime? actualStartDate;
   final DateTime? actualFinishDate;
+  final bool isComplete;
 
   Task({
     required this.id,
@@ -19,6 +20,7 @@ class Task {
     required this.projectId,
     this.actualStartDate,
     this.actualFinishDate,
+    required this.isComplete,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Task {
       projectId: json['projectId'] ?? '',
       actualStartDate: json['actualStartDate'] != null ? DateTime.parse(json['actualStartDate']) : null,
       actualFinishDate: json['actualFinishDate'] != null ? DateTime.parse(json['actualFinishDate']) : null,
+      isComplete: json['isComplete'] ?? false,
     );
   }
 
@@ -46,6 +49,7 @@ class Task {
       'projectId': projectId,
       'actualStartDate': actualStartDate?.toIso8601String(),
       'actualFinishDate': actualFinishDate?.toIso8601String(),
+      'isComplete': isComplete,
     };
   }
 }

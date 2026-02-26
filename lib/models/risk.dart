@@ -8,6 +8,7 @@ class Risk {
   final String notes;
   final String projectId;
   final DateTime occurrenceDate;
+  final bool isClosed;
 
   Risk({
     required this.id,
@@ -19,6 +20,7 @@ class Risk {
     required this.owner,
     required this.notes,
     required this.projectId,
+    required this.isClosed,
   });
 
   factory Risk.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,7 @@ class Risk {
       owner: json['owner'] ?? '',
       notes: json['notes'] ?? '',
       projectId: json['projectId'] ?? '',
+      isClosed: json['isClosed'] ?? false,
     );
   }
 
@@ -46,6 +49,7 @@ class Risk {
       'owner': owner,
       'notes': notes,
       'projectId': projectId,
+      'isClosed': isClosed,
     };
   }
 }

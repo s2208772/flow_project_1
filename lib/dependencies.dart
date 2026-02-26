@@ -264,6 +264,7 @@ class _DependenciesState extends State<Dependencies> {
                   projectId: _project?.name ?? '',
                   actualStartDate: actualStartDate,
                   actualFinishDate: actualFinishDate,
+                  isComplete: false,
                 );
                 setState(() {
                   tasks.add(newTask);
@@ -549,6 +550,7 @@ class _DependenciesState extends State<Dependencies> {
                   projectId: task.projectId,
                   actualStartDate: actualStartDate,
                   actualFinishDate: actualFinishDate,
+                  isComplete: task.isComplete,
                 );
                 setState(() {
                   final index = tasks.indexWhere((t) => t.id == task.id);
@@ -691,10 +693,11 @@ class _DependenciesState extends State<Dependencies> {
                               controller: _horizontalScrollController,
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
-                                width: 1600,
+                                width: 1680,
                                 child: DataTable(
                             showCheckboxColumn: false,
                             columns: const [
+                              DataColumn(label: Text('Task Complete?')),
                               DataColumn(label: Text('Task ID')),
                               DataColumn(label: Text('Task Name')),
                               DataColumn(label: Text('Estimated Start')),
@@ -712,32 +715,102 @@ class _DependenciesState extends State<Dependencies> {
                                 .map((task) => DataRow(
                                       onSelectChanged: (_) => _editTask(task),
                                       cells: [
-                                        DataCell(SizedBox(width: 50, child: Text(task.id))),
+                                        DataCell(
+                                          SizedBox(
+                                            width: 80,
+                                            child: Checkbox(
+                                              value: task.isComplete,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  final updatedTask = Task(
+                                                    id: task.id,
+                                                    isComplete: value!,
+                                                    name: task.name,
+                                                    startDate: task.startDate,
+                                                    finishDate: task.finishDate,
+                                                    notes: task.notes,
+                                                    taskOwner: task.taskOwner,
+                                                    projectId: task.projectId,
+                                                    actualStartDate: task.actualStartDate,
+                                                    actualFinishDate: task.actualFinishDate,
+
+                                                  );
+                                                  final index = tasks.indexWhere((t) => t.id == task.id);
+                                                  if (index != -1) {
+                                                    tasks[index] = updatedTask;
+                                                  }
+                                                  TaskStore.instance.updateTask(updatedTask);
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        DataCell(SizedBox(
+                                          width: 50, 
+                                          child: Text(
+                                            task.id,
+                                            style: TextStyle(
+                                              decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+                                              color: task.isComplete ? Colors.grey : Colors.black,
+                                            ),
+                                          ),
+                                        )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),
                                           child: Tooltip(
                                             message: task.name,
                                             child: SizedBox(
                                               width: 120,
-                                              child: Text(task.name, style: const TextStyle(decoration: TextDecoration.underline, color: Color(0xFF5C5C99)), overflow: TextOverflow.ellipsis),
+                                              child: Text(
+                                                task.name, 
+                                                style: TextStyle(
+                                                  decoration: task.isComplete ? TextDecoration.lineThrough : TextDecoration.underline, 
+                                                  color: task.isComplete ? Colors.grey : const Color(0xFF5C5C99),
+                                                ), 
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
                                             ),
                                           ),
                                         )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),
-                                          child: SizedBox(width: 115, child: Text(DateFormat('dd MMM yyyy').format(task.startDate))),
+                                          child: SizedBox(
+                                            width: 115, 
+                                            child: Text(
+                                              DateFormat('dd MMM yyyy').format(task.startDate),
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ),
                                         )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),
-                                          child: SizedBox(width: 115, child: Text(DateFormat('dd MMM yyyy').format(task.finishDate))),
+                                          child: SizedBox(
+                                            width: 115, 
+                                            child: Text(
+                                              DateFormat('dd MMM yyyy').format(task.finishDate),
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ),
                                         )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),
-                                          child: SizedBox(width: 115, child: Text(task.actualStartDate != null ? DateFormat('dd MMM yyyy').format(task.actualStartDate!) : '-')),
+                                          child: SizedBox(
+                                            width: 115, 
+                                            child: Text(
+                                              task.actualStartDate != null ? DateFormat('dd MMM yyyy').format(task.actualStartDate!) : '-',
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ),
                                         )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),
-                                          child: SizedBox(width: 115, child: Text(task.actualFinishDate != null ? DateFormat('dd MMM yyyy').format(task.actualFinishDate!) : '-')),
+                                          child: SizedBox(
+                                            width: 115, 
+                                            child: Text(
+                                              task.actualFinishDate != null ? DateFormat('dd MMM yyyy').format(task.actualFinishDate!) : '-',
+                                              style: TextStyle(color: Colors.black),
+                                            ),
+                                          ),
                                         )),
                                         DataCell(GestureDetector(
                                           onTap: () => _editTask(task),

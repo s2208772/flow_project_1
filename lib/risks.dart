@@ -87,6 +87,7 @@ class _RisksState extends State<Risks> {
     String? selectedSeverity = 'Medium';
     String? selectedOwner = project?.owner;
     DateTime? selectedOccurrenceDate;
+    bool isClosed = false;
 
     showDialog(
       context: context,
@@ -226,6 +227,7 @@ class _RisksState extends State<Risks> {
                     owner: selectedOwner ?? '',
                     notes: notesController.text,
                     projectId: project?.name ?? '',
+                    isClosed: isClosed,
                   );
                   setState(() {
                     risks.add(newRisk);
@@ -262,6 +264,7 @@ class _RisksState extends State<Risks> {
     final responseController = TextEditingController(text: risk.response);
     final notesController = TextEditingController(text: risk.notes);
     String? selectedSeverity = risk.severity;
+    bool isClosed = risk.isClosed;
     String? selectedOwner = risk.owner;
     DateTime? selectedOccurrenceDate = risk.occurrenceDate;
 
@@ -402,6 +405,7 @@ class _RisksState extends State<Risks> {
                   owner: selectedOwner ?? '',
                   notes: notesController.text,
                   projectId: risk.projectId,
+                  isClosed: isClosed,
                 );
                 setState(() {
                   final index = risks.indexWhere((r) => r.id == risk.id);
@@ -557,10 +561,11 @@ class _RisksState extends State<Risks> {
                               controller: _horizontalScrollController,
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
-                                width: 1520,
+                                width: 1600,
                                 child: DataTable(
                                   showCheckboxColumn: false,
                                   columns: const [
+                                    DataColumn(label: Text('Risk Closed?')),
                                     DataColumn(label: Text('Risk ID')),
                                     DataColumn(label: Text('Description of Risk')),
                                     DataColumn(label: Text('Impact')),
@@ -578,7 +583,42 @@ class _RisksState extends State<Risks> {
                                       .map((risk) => DataRow(
                                             onSelectChanged: (_) => _editRisk(risk, project),
                                             cells: [
-                                              DataCell(SizedBox(width: 50, child: Text(risk.id))),
+                                              DataCell(
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Checkbox(
+                                                    value: risk.isClosed,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        final updatedRisk = Risk(
+                                                          id: risk.id,
+                                                          description: risk.description,
+                                                          impact: risk.impact,
+                                                          response: risk.response,
+                                                          severity: risk.severity,
+                                                          occurrenceDate: risk.occurrenceDate,
+                                                          owner: risk.owner,
+                                                          notes: risk.notes,
+                                                          projectId: risk.projectId,
+                                                          isClosed: value ?? false,
+                                                        );
+                                                        final index = risks.indexWhere((r) => r.id == risk.id);
+                                                        if (index != -1) {
+                                                          risks[index] = updatedRisk;
+                                                        }
+                                                        RiskStore.instance.updateRisk(updatedRisk);
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(SizedBox(
+                                                width: 45,
+                                                child: Text(
+                                                  risk.id,
+                                                  style: TextStyle(decoration: risk.isClosed ? TextDecoration.lineThrough : TextDecoration.none, color: risk.isClosed ? Colors.grey : Colors.black),
+                                                ),
+                                              )),
                                               DataCell(GestureDetector(
                                                 onTap: () => _editRisk(risk, project),
                                                 child: Tooltip(
@@ -587,7 +627,7 @@ class _RisksState extends State<Risks> {
                                                     width: 180,
                                                     child: Text(
                                                       risk.description,
-                                                      style: const TextStyle(decoration: TextDecoration.underline, color: Color(0xFF5C5C99)),
+                                                      style: TextStyle(decoration: risk.isClosed ? TextDecoration.lineThrough : TextDecoration.underline, color: risk.isClosed ? Colors.grey : const Color(0xFF5C5C99)),
                                                       overflow: TextOverflow.ellipsis,
                                                       maxLines: 2,
                                                     ),

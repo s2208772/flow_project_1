@@ -18,7 +18,7 @@ class MyTasks extends StatefulWidget {
   State<MyTasks> createState() => _MyTasksState();
 }
 
-class _MyTasksState extends State<MyTasks> {
+class _MyTasksState extends State<MyTasks> with RouteAware {
   List<Task> _tasks = [];
   List<Risk> _risks = [];
   bool _isLoading = true;
@@ -30,6 +30,15 @@ class _MyTasksState extends State<MyTasks> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Reload data every time the page is shown
+    if (!_isLoading) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -58,7 +67,7 @@ class _MyTasksState extends State<MyTasks> {
     ).toList();
     
     final userRisks = allRisks.where((risk) => 
-      risk.owner.toLowerCase() == ownerKey
+      risk.owner.toLowerCase() == ownerKey && !risk.isClosed
     ).toList();
 
     setState(() {
@@ -133,7 +142,7 @@ class _MyTasksState extends State<MyTasks> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Here are your open assigned tasks/risks for this project:',
+                    'Here are your OPEN (no actual finish date set) assigned tasks/risks for this project:',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.black87,
                           fontSize: 14,
@@ -202,44 +211,64 @@ class _MyTasksState extends State<MyTasks> {
                               ...List.generate(_tasks.length, (index) {
                                 final task = _tasks[index];
                                 final isOverdue = task.finishDate.isBefore(DateTime.now());
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isOverdue ? Colors.red.shade300 : Colors.grey.shade300,
-                                        width: isOverdue ? 2 : 1,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                task.name,
-                                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isOverdue ? Colors.red.shade900 : Colors.black87,
-                                                    ),
+                                final isComplete = task.isComplete;
+                                bool isHovered = false;
+                                return StatefulBuilder(
+                                  builder: (context, setLocalState) {
+                                    return MouseRegion(
+                                      onEnter: (_) => setLocalState(() => isHovered = true),
+                                      onExit: (_) => setLocalState(() => isHovered = false),
+                                      cursor: SystemMouseCursors.click,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          if (project != null) {
+                                            Navigator.pushNamed(context, '/dependencies', arguments: project).then((_) => _loadData());
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: isHovered ? Colors.grey.shade300 : Colors.grey.shade50,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isComplete ? Colors.green.shade300 : isOverdue ? Colors.red.shade300 : Colors.grey.shade300,
+                                                width: isComplete || isOverdue ? 2 : 1,
                                               ),
                                             ),
-                                          ],
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        'ID: ${task.id} - ${task.name}',
+                                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                              fontWeight: FontWeight.bold,
+                                                              color: isComplete ? Colors.green.shade900 : isOverdue ? Colors.red.shade900 : Colors.black87,
+                                                              decoration: isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        'Estimated Finish Date: ${task.finishDate.month}/${task.finishDate.day}/${task.finishDate.year}',
+                                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                              color: isComplete ? Colors.green.shade900 : isOverdue ? Colors.red.shade900 : Colors.black87,
+                                                              decoration: isComplete ? TextDecoration.lineThrough : TextDecoration.none,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Estimated Finish Date: ${task.finishDate.month}/${task.finishDate.day}/${task.finishDate.year}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: isOverdue ? Colors.red.shade900 : Colors.black87,
-                                          ),    
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 );
                               }),
                               const SizedBox(height: 16),
@@ -257,46 +286,62 @@ class _MyTasksState extends State<MyTasks> {
                               const SizedBox(height: 12),
                               ...List.generate(_risks.length, (index) {
                                 final risk = _risks[index];
-                                final isOverdue = risk.occurrenceDate.isBefore(DateTime.now());                                
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade50,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isOverdue ? Colors.red.shade300 : Colors.grey.shade300,
-                                        width: isOverdue ? 2 : 1,
-                                      ),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            if (isOverdue)
-                                            Expanded(
-                                              child: Text(
-                                                risk.description,
-                                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isOverdue ? Colors.red.shade900 : Colors.black87,
-                                                    ),
+                                final isOverdue = risk.occurrenceDate.isBefore(DateTime.now());
+                                bool isHovered = false;
+                                return StatefulBuilder(
+                                  builder: (context, setLocalState) {
+                                    return MouseRegion(
+                                      onEnter: (_) => setLocalState(() => isHovered = true),
+                                      onExit: (_) => setLocalState(() => isHovered = false),
+                                      cursor: SystemMouseCursors.click,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          if (project != null) {
+                                            Navigator.pushNamed(context, '/risks', arguments: project).then((_) => _loadData());
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: isHovered ? Colors.grey.shade300 : Colors.grey.shade50,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isOverdue ? Colors.red.shade300 : Colors.grey.shade300,
+                                                width: isOverdue ? 2 : 1,
                                               ),
                                             ),
-                                          ],
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        'ID: ${risk.id} - ${risk.description}',
+                                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                                              fontWeight: FontWeight.bold,
+                                                              color: isOverdue ? Colors.red.shade900 : Colors.black87,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        'Severity: ${risk.severity} | Expected Occurrence Date: ${DateFormat.yMMMd().format(risk.occurrenceDate)}',
+                                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                              color: isOverdue ? Colors.red.shade900 : Colors.black87,
+                                                            ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Severity: ${risk.severity} | Expected Occurrence Date: ${DateFormat.yMMMd().format(risk.occurrenceDate)}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                color: isOverdue ? Colors.red.shade900 : Colors.black87,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 );
                               }),
                             ],

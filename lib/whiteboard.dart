@@ -63,6 +63,30 @@ class _WhiteboardState extends State<Whiteboard> {
     });
   }
 
+  Future<bool> onLeavingPage() async {
+    final shouldLeave = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Warning'),
+        content: const Text('This whiteboard is temporary and does not save your work, so be sure to save anything important locally before leaving this page. Are you sure you want to leave?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5C5C99),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
+    return shouldLeave ?? false;
+  }
   void _addText() {
     final controller = TextEditingController();
     showDialog(
@@ -108,22 +132,31 @@ class _WhiteboardState extends State<Whiteboard> {
     );
   }
 
-  // ── Text overlays (draggable text on top of the drawing) ──
+  //Text overlays addition
   final List<_TextOverlay> _textOverlays = [];
 
   @override
   Widget build(BuildContext context) {
     final project = ModalRoute.of(context)?.settings.arguments as Project?;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldLeave = await onLeavingPage();
+        if (shouldLeave && mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       appBar: project != null
-          ? ProjectHeader(project: project)
+          ? ProjectHeader(project: project, onNavigateAway: onLeavingPage)
           : AppBar(title: const Text('Whiteboard')),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Stack(
             children: [
-              // ── Full-screen drawing board + text overlays (all inside Screenshot) ──
+              // Full-screen drawing board + text overlays
               Screenshot(
                 controller: _screenshotController,
                 child: SizedBox(
@@ -144,7 +177,7 @@ class _WhiteboardState extends State<Whiteboard> {
                         showDefaultTools: true,
                       ),
 
-                      // ── Draggable text overlays ──
+                      // Draggable text overlays
                       for (int i = 0; i < _textOverlays.length; i++)
                         Positioned(
                           left: _textOverlays[i].offset.dx,
@@ -189,7 +222,7 @@ class _WhiteboardState extends State<Whiteboard> {
                 ),
               ),
 
-              // ── Floating toolbar (top-right) ──
+              // Floating toolbar (top-right)
               Positioned(
                 top: 8,
                 right: 8,
@@ -245,7 +278,7 @@ class _WhiteboardState extends State<Whiteboard> {
           );
         },
       ),
-    );
+    ));
   }
 
   Widget _buildFloatingButton({

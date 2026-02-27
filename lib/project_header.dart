@@ -1,13 +1,30 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flow_project_1/models/project.dart';
 
 class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
   final Project project;
+  final Future<bool> Function()? onNavigateAway;
   
-  const ProjectHeader({super.key, required this.project});
+  const ProjectHeader({super.key, required this.project, this.onNavigateAway});
+
+  Future<void> _navigate(BuildContext context, String route, {Object? arguments}) async {
+    if (onNavigateAway != null) {
+      final allowed = await onNavigateAway!();
+      if (!allowed) return;
+    }
+    if (context.mounted) {
+      Navigator.pushNamed(context, route, arguments: arguments);
+    }
+  }
 
   Future<void> _signOut(BuildContext context) async {
+    if (onNavigateAway != null) {
+      final allowed = await onNavigateAway!();
+      if (!allowed) return;
+    }
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -31,7 +48,6 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
 
     if (confirm == true && context.mounted) {
       await FirebaseAuth.instance.signOut();
-      // Navigate to root and clear navigation stack
       if (context.mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
@@ -52,51 +68,35 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       actions: [
         IconButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/home');
-          },
+          onPressed: () => _navigate(context, '/home'),
           icon: const Icon(Icons.home, color: Colors.white),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/my_projects');
-          },
+          onPressed: () => _navigate(context, '/my_projects'),
           child: const Text('My Projects', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/summary', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/summary', arguments: project),
           child: const Text('Summary', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/my_tasks', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/my_tasks', arguments: project),
           child: const Text('My Tasks', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/plan', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/plan', arguments: project),
           child: const Text('Plan', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/dependencies', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/dependencies', arguments: project),
           child: const Text('Schedule', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/gantt_chart', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/gantt_chart', arguments: project),
           child: const Text('Gantt Chart', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/risks', arguments: project);
-          },
+          onPressed: () => _navigate(context, '/risks', arguments: project),
           child: const Text('Risks', style: TextStyle(color: Colors.white)),
         ),
         TextButton(

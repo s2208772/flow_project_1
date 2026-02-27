@@ -93,7 +93,13 @@ class Plan extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/whiteboard',
+                                arguments: project,
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                               side: BorderSide(color: const Color(0xFF5C5C99), width: 5),
@@ -102,7 +108,7 @@ class Plan extends StatelessWidget {
                             ),
                             child:
                             Text(
-                              'Whiteboard',
+                              'Quick Whiteboard',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF5C5C99),
                                     fontSize: 16,
@@ -112,7 +118,13 @@ class Plan extends StatelessWidget {
                           ),
                           const SizedBox(height: 25),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/checklist',
+                                arguments: project,
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                               side: BorderSide(color: const Color(0xFF5C5C99), width: 5),
@@ -120,7 +132,7 @@ class Plan extends StatelessWidget {
                             ),
                             child:
                             Text(
-                              'Prototype',
+                              'Checklist',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: const Color(0xFF5C5C99),
                                     fontSize: 16,

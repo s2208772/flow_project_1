@@ -45,10 +45,12 @@ class _SignUpSignInState extends State<SignUpSignIn> {
       if (_isSignUp) {
         // Sign Up
         final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+
+        // Set displayName on the Firebase Auth user
+        await userCredential.user!.updateDisplayName(_nameController.text.trim());
         
         // Create user profile in Firestore
         await FirebaseFirestore.instance

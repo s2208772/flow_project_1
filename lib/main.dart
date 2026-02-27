@@ -11,8 +11,10 @@ import 'risks.dart';
 import 'gantt_chart.dart';
 import 'dependencies.dart';
 import 'create_new_project.dart';
+import 'whiteboard.dart';
 import 'header.dart';
 import 'auth_service.dart' show SignUpSignIn;
+import 'checklist.dart';
 import 'models/project.dart';
 
 class WavyPainter extends CustomPainter {
@@ -86,7 +88,9 @@ class MyApp extends StatelessWidget {
           return Dependencies(project: project);
         },
         '/create_new_project': (context) => CreateNewProject(),
+        '/whiteboard': (context) => const Whiteboard(),
         '/auth': (context) => const SignUpSignIn(),
+        '/checklist': (context) => const ChecklistPage(),
       },
     );
   }

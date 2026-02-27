@@ -7,7 +7,6 @@ import 'my_projects.dart';
 import 'summary.dart';
 import 'my_tasks.dart';
 import 'plan.dart';
-import 'schedule.dart';
 import 'risks.dart';
 import 'gantt_chart.dart';
 import 'dependencies.dart';
@@ -77,7 +76,6 @@ class MyApp extends StatelessWidget {
         '/summary': (context) => const Summary(),
         '/my_tasks': (context) => const MyTasks(),
         '/plan': (context) => const Plan(),
-        '/schedule': (context) => const Schedule(),
         '/risks': (context) {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
           return Risks(project: project);

@@ -83,9 +83,15 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/schedule', arguments: project);
+            Navigator.pushNamed(context, '/dependencies', arguments: project);
           },
           child: const Text('Schedule', style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/gantt_chart', arguments: project);
+          },
+          child: const Text('Gantt Chart', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
           onPressed: () {

@@ -59,18 +59,9 @@ class _ChecklistPageState extends State<ChecklistPage> {
     }
   }
 
-  String _getDisplayName(String email) {
-    final name = _userNames[email];
-    if (name != null && name.isNotEmpty && name != email) {
-      return '$name ($email)';
-    }
-    return email;
-  }
-
   void _addTask(Project? project) {
     final nameController = TextEditingController();
     final notesController = TextEditingController();
-    String? selectedOwner = project?.owner;
 
     showDialog(
       context: context,

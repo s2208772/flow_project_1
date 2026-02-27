@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flow_project_1/models/activity_log.dart';
 
@@ -47,7 +49,7 @@ class ActivityLogStore {
       activities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return activities;
     } catch (e) {
-      print('Error getting activities');
+      log('Error getting activities: $e');
       return [];
     }
   }
@@ -65,7 +67,7 @@ class ActivityLogStore {
       activities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return activities.take(limit).toList();
     } catch (e) {
-      print('Error getting recent activities: $e');
+      log('Error getting recent activities: $e');
       return [];
     }
   }

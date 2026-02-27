@@ -265,7 +265,7 @@ class _WhiteboardState extends State<Whiteboard> {
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to save: $e')),
+                              const SnackBar(content: Text('Failed to save image. Please try again.')),
                             );
                           }
                         }

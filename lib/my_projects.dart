@@ -139,7 +139,9 @@ class _MyProjectsState extends State<MyProjects> {
                             memberController.clear();
                             setState(() {});
                           } catch (e) {
-                            // Error handling placeholder - to be implemented during testing
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error adding member. Please try again.')),
+                            );
                           }
                         },
                       ),
@@ -162,7 +164,9 @@ class _MyProjectsState extends State<MyProjects> {
                           memberController.clear();
                           setState(() {});
                         } catch (e) {
-                          // Error handling placeholder - to be implemented during testing
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error adding member. Please try again.')),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -226,7 +230,6 @@ class _MyProjectsState extends State<MyProjects> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
             Text(
               'This is where you can view projects that you own or are apart of.',
               textAlign: TextAlign.left,
@@ -325,7 +328,7 @@ class _MyProjectsState extends State<MyProjects> {
                                         context: context,
                                         builder: (ctx) => AlertDialog(
                                           title: const Text('Delete Project', style: TextStyle(color: Color(0xFF5C5C99), fontWeight: FontWeight.bold)),
-                                          content: Text('Are you sure you want to delete "${p.name}"? This cannot be undone.'),
+                                          content: Text('Are you sure you want to delete "${p.name}"? This is permanent.'),
                                           actions: [
                                             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                                             TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
@@ -373,7 +376,7 @@ class _MyProjectsState extends State<MyProjects> {
                                       if (newStatus != null) {
                                         await ProjectStore.instance.updateProjectStatus(p.name, newStatus);
                                         _refresh();
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Status updated to: $newStatus')));
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Status updated to $newStatus')));
                                       }
                                     }
                                   },

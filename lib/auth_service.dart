@@ -90,13 +90,13 @@ class _SignUpSignInState extends State<SignUpSignIn> {
   String _getErrorMessage(String code) {
     switch (code) {
       case 'email-already-in-use':
-        return 'This email is already registered. Please sign in.';
+        return 'This email is already registered. Please sign in with your password.';
       case 'invalid-email':
         return 'Please enter a valid email address.';
       case 'weak-password':
         return 'Password must be at least 6 characters.';
       case 'user-not-found':
-        return 'No account found with this email.';
+        return 'No account found with this email. Please sign up first.';
       case 'wrong-password':
         return 'Incorrect password. Please try again.';
       case 'invalid-credential':
@@ -104,7 +104,7 @@ class _SignUpSignInState extends State<SignUpSignIn> {
       case 'too-many-requests':
         return 'Too many attempts. Please try again later.';
       default:
-        return 'Authentication failed. Please try again.';
+        return 'Sign in failed. Please try again later.';
     }
   }
 

@@ -11,7 +11,6 @@ import 'schedule.dart';
 import 'risks.dart';
 import 'gantt_chart.dart';
 import 'dependencies.dart';
-import 'contact_us.dart';
 import 'create_new_project.dart';
 import 'header.dart';
 import 'auth_service.dart' show SignUpSignIn;
@@ -88,7 +87,6 @@ class MyApp extends StatelessWidget {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
           return Dependencies(project: project);
         },
-        '/contact_us': (context) => const ContactUs(),
         '/create_new_project': (context) => CreateNewProject(),
         '/auth': (context) => const SignUpSignIn(),
       },

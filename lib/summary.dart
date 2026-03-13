@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/models/activity_log.dart';
 import 'package:flow_project_1/services/activity_log_store.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'project_header.dart';
 
 class Summary extends StatefulWidget {
@@ -28,8 +29,9 @@ class _SummaryState extends State<Summary> {
 
   Future<void> _loadData() async {
     final project = ModalRoute.of(context)?.settings.arguments as Project?;
-    if (project != null) {
-      final lastVisit = await ActivityLogStore.instance.getLastVisit(project.name);
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (project != null && userId != null) {
+      final lastVisit = await ActivityLogStore.instance.getLastVisit(project.name, userId: userId);
       List<ActivityLog> newActivities = [];
       if (lastVisit != null) {
         newActivities = await ActivityLogStore.instance.getActivitiesSince(project.name, lastVisit);
@@ -43,7 +45,7 @@ class _SummaryState extends State<Summary> {
         _isLoading = false;
       });
       
-      await ActivityLogStore.instance.recordVisit(project.name);
+      await ActivityLogStore.instance.recordVisit(project.name, userId: userId);
     }
   }
 

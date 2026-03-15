@@ -386,6 +386,5 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 }
-
 //References:
 //GeeksforGeeks. (2022a, March 27). Read and Write Data in Flutter using SharedPreferences. GeeksforGeeks. https://www.geeksforgeeks.org/flutter/read-and-write-data-in-flutter-using-sharedpreferences/

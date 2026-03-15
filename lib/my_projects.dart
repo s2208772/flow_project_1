@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'header.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/services/project_store.dart';
@@ -314,8 +315,12 @@ class _MyProjectsState extends State<MyProjects> {
                                 DataCell(Text(p.owner)),
                                 DataCell(Text(p.status)),
                                 DataCell(ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, '/summary', arguments: p);
+                                  onPressed: () async {
+                                    final prefs = await SharedPreferences.getInstance();
+                                    await prefs.setString('lastProject', p.name);
+                                    if (context.mounted) {
+                                      Navigator.pushNamed(context, '/summary', arguments: p);
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5C5C99)),
                                   child: const Text('Select', style: TextStyle(color: Colors.white)),

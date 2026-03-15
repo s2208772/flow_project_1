@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'dart:math' as math;
+import 'services/project_store.dart';
 import 'my_projects.dart';
 import 'summary.dart';
 import 'my_tasks.dart';
@@ -75,31 +77,103 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const MyHomePage(title: 'Flow Project Home Page'),
         '/my_projects': (context) => MyProjects(),
-        '/summary': (context) => const Summary(),
-        '/my_tasks': (context) => const MyTasks(),
-        '/plan': (context) => const Plan(),
+        '/summary': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/summary');
+          }
+          return const Summary();
+        },
+        '/my_tasks': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/my_tasks');
+          }
+          return const MyTasks();
+        },
+        '/plan': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/plan');
+          }
+          return const Plan();
+        },
         '/risks': (context) {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
+          if (project == null) return const _ProjectRestorer(route: '/risks');
           return Risks(project: project);
         },
-        '/gantt_chart': (context) => const GanttChart(),
+        '/gantt_chart': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/gantt_chart');
+          }
+          return const GanttChart();
+        },
         '/dependencies': (context) {
           final project = ModalRoute.of(context)?.settings.arguments as Project?;
+          if (project == null) return const _ProjectRestorer(route: '/dependencies');
           return Dependencies(project: project);
         },
         '/create_new_project': (context) => CreateNewProject(),
-        '/whiteboard': (context) => const Whiteboard(),
+        '/whiteboard': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/whiteboard');
+          }
+          return const Whiteboard();
+        },
         '/auth': (context) => const SignUpSignIn(),
-        '/checklist': (context) => const ChecklistPage(),
+        '/checklist': (context) {
+          if (ModalRoute.of(context)?.settings.arguments == null) {
+            return const _ProjectRestorer(route: '/checklist');
+          }
+          return const ChecklistPage();
+        },
       },
     );
   }
 }
 
-/// Set to true to skip login during development
+///Skip auth during dev
 const bool kSkipAuth = false;
 
-/// Wrapper that listens to auth state and shows AuthPage or HomePage
+// Restoring project to avoid losing state on refresh
+class _ProjectRestorer extends StatefulWidget {
+  final String route;
+  const _ProjectRestorer({required this.route});
+
+  @override
+  State<_ProjectRestorer> createState() => _ProjectRestorerState();
+}
+
+class _ProjectRestorerState extends State<_ProjectRestorer> {
+  @override
+  void initState() {
+    super.initState();
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    //Code adapted from (GeeksforGeeks, 2022a)
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('lastProject');
+    if (name != null) {
+      final project = await ProjectStore.instance.getProject(name);
+      if (project != null && mounted) {
+        Navigator.of(context).pushReplacementNamed(widget.route, arguments: project);
+        return;
+      }
+    }
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/my_projects');
+    }
+  }
+//End of adapted code
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator(color: Color(0xFF5C5C99))),
+    );
+  }
+}
+
+/// Screen for creating a new project WITH Auth wrapper
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -312,3 +386,6 @@ class _MyHomePageState extends State<MyHomePage>
     );
   }
 }
+
+//References:
+//GeeksforGeeks. (2022a, March 27). Read and Write Data in Flutter using SharedPreferences. GeeksforGeeks. https://www.geeksforgeeks.org/flutter/read-and-write-data-in-flutter-using-sharedpreferences/

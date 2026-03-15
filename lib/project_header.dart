@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flow_project_1/models/project.dart';
 
 class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -14,6 +15,10 @@ class ProjectHeader extends StatelessWidget implements PreferredSizeWidget {
     if (onNavigateAway != null) {
       final allowed = await onNavigateAway!();
       if (!allowed) return;
+    }
+    if (arguments is Project) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('Project', (arguments).name);
     }
     if (context.mounted) {
       Navigator.pushNamed(context, route, arguments: arguments);

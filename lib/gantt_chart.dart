@@ -61,6 +61,22 @@ class _GanttChartState extends State<GanttChart> {
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(height: 8),
+            Text(
+              'Each grid box represents a day. The light bar shows planned duration, while the dark bar shows actual progress.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Tap on a task to view in the schedule.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                    fontSize: 12,
+                  ),
+              textAlign: TextAlign.right,
+            ),
             const SizedBox(height: 24),
             Expanded(
               child: Container(
@@ -98,10 +114,12 @@ class _GanttChartState extends State<GanttChart> {
   }
 
   Widget _buildGanttChart() {
-    final minDate = _tasks.map((t) => t.startDate).reduce(
-        (a, b) => a.isBefore(b) ? a : b);
-    final maxDate = _tasks.map((t) => t.finishDate).reduce(
-        (a, b) => a.isAfter(b) ? a : b);
+    final today = DateTime.now();
+    final allStarts = _tasks.expand((t) => [t.startDate, if (t.actualStartDate != null) t.actualStartDate!]).toList();
+    final allFinishes = _tasks.expand((t) => [t.finishDate, if (t.actualFinishDate != null) t.actualFinishDate!]).toList();
+    final minDate = allStarts.reduce((a, b) => a.isBefore(b) ? a : b).subtract(const Duration(days: 7));
+    final maxDateFromTasks = allFinishes.reduce((a, b) => a.isAfter(b) ? a : b);
+    final maxDate = (maxDateFromTasks.isAfter(today) ? maxDateFromTasks : today).add(const Duration(days: 7));
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -117,7 +135,7 @@ class _GanttChartState extends State<GanttChart> {
             lineColor: Colors.grey.shade300,
             fontSize: 12,
             onTaskTap: (task) {
-              // Link back to Dependencies table
+              // Link back to table
               Navigator.pushNamed(
                 context,
                 '/dependencies',
@@ -229,8 +247,8 @@ class GanttPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
     
     gridPaint = Paint()
-      ..color = lineColor.withOpacity(0.5)
-      ..strokeWidth = 0.5
+      ..color = lineColor
+      ..strokeWidth = 0.9
       ..style = PaintingStyle.stroke;
   }
 
@@ -273,7 +291,7 @@ class GanttPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (tasks.isEmpty) return;
 
-    const double labelWidth = 120;
+    const double labelWidth = 200;
     const double headerHeight = 30;
     const double rowHeight = 40;
     const double barPadding = 8;
@@ -285,12 +303,20 @@ class GanttPainter extends CustomPainter {
     _drawHeader(canvas, size, labelWidth, headerHeight, dayWidth, totalDays);
     _drawGrid(canvas, size, labelWidth, headerHeight, dayWidth, totalDays, rowHeight);
 
+    // Draw label
     for (int i = 0; i < tasks.length; i++) {
       final task = tasks[i];
       final y = headerHeight + (i * rowHeight);
-  
-      //Task label with ID
       _drawTaskLabel(canvas, '${task.id} - ${task.name}', 0, y, labelWidth, rowHeight);
+    }
+
+    //then draw bars
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(labelWidth, 0, size.width - labelWidth, size.height));
+    
+    for (int i = 0; i < tasks.length; i++) {
+      final task = tasks[i];
+      final y = headerHeight + (i * rowHeight);
       
       final startOffset = task.startDate.difference(startDate).inDays;
       final duration = task.finishDate.difference(task.startDate).inDays + 1;
@@ -318,14 +344,26 @@ class GanttPainter extends CustomPainter {
           const Radius.circular(2),
         );
         canvas.drawRRect(actualRect, actualPaint);
+
+        //ACTUAL duration
+        _drawBarText(canvas, '${actualDuration}d', actualX, barY + barHeight / 4, actualWidth, barHeight / 2);
       }
-      
       //Duration
       _drawBarText(canvas, '${duration}d', barX, barY, barWidth, barHeight);
-    }
     
+
+    //Start for each task as dd/mm
+    final taskStartLabel = '${task.startDate.day.toString().padLeft(1,'0')}/${task.startDate.month.toString().padLeft(2,'0')}';
+    _drawText(canvas, taskStartLabel, barX - 30, barY + (barHeight - fontSize) / 2, fontSize - 2, FontWeight.normal, const Color.fromARGB(255, 0, 0, 0));
+    
+    //Finish date for each task as dd/mm
+    final taskFinishLabel = '${task.finishDate.day.toString().padLeft(1,'0')}/${task.finishDate.month.toString().padLeft(2,'0')}';
+    _drawText(canvas, taskFinishLabel, barX + barWidth + 4, barY + (barHeight - fontSize) / 2, fontSize - 2, FontWeight.normal, const Color.fromARGB(255, 0, 0, 0));
+    }
+
     // Draw today's date line
     _drawTodayLine(canvas, size, labelWidth, headerHeight, dayWidth);
+    canvas.restore();
   }
 
   void _drawHeader(Canvas canvas, Size size, double labelWidth, double headerHeight, 
@@ -355,7 +393,7 @@ class GanttPainter extends CustomPainter {
   void _drawGrid(Canvas canvas, Size size, double labelWidth, double headerHeight, 
       double dayWidth, int totalDays, double rowHeight) {
     // Grid lines
-    for (int i = 0; i <= totalDays; i += 7) {
+    for (int i = 0; i <= totalDays; i += 1) {
       final x = labelWidth + (i * dayWidth);
       canvas.drawLine(
         Offset(x, headerHeight),
@@ -406,7 +444,7 @@ class GanttPainter extends CustomPainter {
     );
     textPainter.layout();
     
-    if (textPainter.width < width - 8) {
+    if (textPainter.width < width - 2) {
       textPainter.paint(
         canvas, 
         Offset(x + (width - textPainter.width) / 2, y + (height - textPainter.height) / 2),

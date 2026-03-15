@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'header.dart';
 import 'package:flow_project_1/models/project.dart';
 import 'package:flow_project_1/services/project_store.dart';
@@ -12,6 +13,7 @@ class _CreateNewProjectState extends State<CreateNewProject> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ownerController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
   String? _projectType;
   String? _status;
   DateTime? _targetDate;
@@ -34,6 +36,7 @@ class _CreateNewProjectState extends State<CreateNewProject> {
   void dispose() {
     _nameController.dispose();
     _ownerController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -45,7 +48,12 @@ class _CreateNewProjectState extends State<CreateNewProject> {
       firstDate: DateTime(now.year - 5),
       lastDate: DateTime(now.year + 10),
     );
-    if (picked != null) setState(() => _targetDate = picked);
+    if (picked != null) {
+      setState(() {
+        _targetDate = picked;
+        _dateController.text = DateFormat('dd MMM yyyy').format(picked);
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -124,10 +132,11 @@ class _CreateNewProjectState extends State<CreateNewProject> {
                           onTap: _pickDate,
                           child: AbsorbPointer(
                             child: TextFormField(
-                              decoration: InputDecoration(
+                              controller: _dateController,
+                              decoration: const InputDecoration(
                                 labelText: 'Target Completion Date',
-                                hintText: _targetDate == null ? 'Select date' : '${_targetDate!.toLocal()}'.split(' ')[0],
-                                suffixIcon: const Icon(Icons.calendar_today),
+                                hintText: 'Select date',
+                                suffixIcon: Icon(Icons.calendar_today),
                               ),
                               validator: (v) => _targetDate == null ? 'Choose a date' : null,
                             ),

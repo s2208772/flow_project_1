@@ -561,7 +561,7 @@ class _RisksState extends State<Risks> {
                               controller: _horizontalScrollController,
                               scrollDirection: Axis.horizontal,
                               child: SizedBox(
-                                width: 1600,
+                                width: 1800,
                                 child: DataTable(
                                   showCheckboxColumn: false,
                                   columns: const [
@@ -585,7 +585,7 @@ class _RisksState extends State<Risks> {
                                             cells: [
                                               DataCell(
                                                 SizedBox(
-                                                  width: 100,
+                                                  width: 60,
                                                   child: Checkbox(
                                                     value: risk.isClosed,
                                                     onChanged: (value) {
@@ -684,27 +684,30 @@ class _RisksState extends State<Risks> {
                                                 ),
                                               )),
                                               DataCell(
-                                                SizedBox(
-                                                  width: 80,
-                                                  child: Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      IconButton(
-                                                        icon: const Icon(Icons.edit, color: Color(0xFF5C5C99), size: 18),
-                                                        onPressed: () => _editRisk(risk, project),
-                                                        tooltip: 'Edit',
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                      const SizedBox(width: 8),
-                                                      IconButton(
-                                                        icon: const Icon(Icons.delete, color: Colors.red, size: 18),
-                                                        onPressed: () => _deleteRisk(risk),
-                                                        tooltip: 'Delete',
-                                                        padding: EdgeInsets.zero,
-                                                        constraints: const BoxConstraints(),
-                                                      ),
-                                                    ],
+                                                GestureDetector(
+                                                  onTap: () {},
+                                                  child: SizedBox(
+                                                    width: 80,
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(Icons.edit, color: Color(0xFF5C5C99), size: 18),
+                                                          onPressed: () => _editRisk(risk, project),
+                                                          tooltip: 'Edit',
+                                                          padding: EdgeInsets.zero,
+                                                          constraints: const BoxConstraints(),
+                                                        ),
+                                                        const SizedBox(width: 8),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.delete, color: Colors.red, size: 18),
+                                                          onPressed: () => _deleteRisk(risk),
+                                                          tooltip: 'Delete',
+                                                          padding: EdgeInsets.zero,
+                                                          constraints: const BoxConstraints(),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),

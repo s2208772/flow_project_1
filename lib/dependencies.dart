@@ -92,7 +92,8 @@ class _DependenciesState extends State<Dependencies> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
         title: const Text('Add New Task'),
         content: SingleChildScrollView(
           child: Column(
@@ -108,21 +109,24 @@ class _DependenciesState extends State<Dependencies> {
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: startDate ?? DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      startDate = date;
+                      setDialogState(() {
+                        startDate = date;
+                      });
                     }
                   },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Estimated Start Date',
-                        hintText: startDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(startDate!),
-                        suffixIcon: const Icon(Icons.calendar_today),
-                      ),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Estimated Start Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      startDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(startDate!),
+                      style: TextStyle(fontSize: 16, color: startDate == null ? Colors.grey : Colors.black),
                     ),
                   ),
                 ),
@@ -133,21 +137,24 @@ class _DependenciesState extends State<Dependencies> {
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: finishDate ?? DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      finishDate = date;
+                      setDialogState(() {
+                        finishDate = date;
+                      });
                     }
                   },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Estimated Finish Date',
-                        hintText: finishDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(finishDate!),
-                        suffixIcon: const Icon(Icons.calendar_today),
-                      ),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Estimated Finish Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      finishDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(finishDate!),
+                      style: TextStyle(fontSize: 16, color: finishDate == null ? Colors.grey : Colors.black),
                     ),
                   ),
                 ),
@@ -197,21 +204,24 @@ class _DependenciesState extends State<Dependencies> {
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: actualStartDate ?? DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      actualStartDate = date;
+                      setDialogState(() {
+                        actualStartDate = date;
+                      });
                     }
                   },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Actual Start Date',
-                        hintText: actualStartDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(actualStartDate!),
-                        suffixIcon: const Icon(Icons.calendar_today),
-                      ),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Actual Start Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      actualStartDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(actualStartDate!),
+                      style: TextStyle(fontSize: 16, color: actualStartDate == null ? Colors.grey : Colors.black),
                     ),
                   ),
                 ),
@@ -222,21 +232,24 @@ class _DependenciesState extends State<Dependencies> {
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: actualFinishDate ?? DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2100),
                     );
                     if (date != null) {
-                      actualFinishDate = date;
+                      setDialogState(() {
+                        actualFinishDate = date;
+                      });
                     }
                   },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Actual Finish Date',
-                        hintText: actualFinishDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(actualFinishDate!),
-                        suffixIcon: const Icon(Icons.calendar_today),
-                      ),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Actual Finish Date',
+                      suffixIcon: Icon(Icons.calendar_today),
+                    ),
+                    child: Text(
+                      actualFinishDate == null ? 'Select date' : DateFormat('dd MMM yyyy').format(actualFinishDate!),
+                      style: TextStyle(fontSize: 16, color: actualFinishDate == null ? Colors.grey : Colors.black),
                     ),
                   ),
                 ),
@@ -287,6 +300,7 @@ class _DependenciesState extends State<Dependencies> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
